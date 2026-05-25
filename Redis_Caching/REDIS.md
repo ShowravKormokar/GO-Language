@@ -20,7 +20,8 @@ Redis is widely adopted because:
   - Rate‑limiting and job queues. [web:4][web:10]
 
 ---
-<img width="716" height="1600" alt="WhatsApp Image 2026-05-26 at 12 27 27 AM" src="https://github.com/user-attachments/assets/8785e402-c681-46e7-aca5-77a684d3b048" />
+<img width="1061" height="1600" alt="WhatsApp Image 2026-05-26 at 12 30 33 AM" src="https://github.com/user-attachments/assets/553194dd-722a-41db-b327-9a267f17caf9" />
+
 ---
 
 ## How Redis works internally (brief)
