@@ -5,3 +5,14 @@ type APIResponse struct {
 	Status int         `json:"status"`
 	Data   interface{} `json:"omitempty"`
 }
+
+type SuccessResponse struct {
+	Mssg   string `json:"mssg"`
+	Status int    `json:"status"`
+}
+
+type ErrorResponse struct {
+	Mssg   string `json:"mssg"`
+	Status int    `json:"status"`
+	Error  error  `json:"error,omitempty"`
+}
