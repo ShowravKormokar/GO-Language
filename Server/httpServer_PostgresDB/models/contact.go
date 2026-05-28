@@ -6,6 +6,6 @@ type Contact struct {
 	ID          int       `json:"id"`
 	Name        string    `json:"name"`
 	Phone       string    `json:"phone"`
-	Description string    `json:"description"`
+	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
 }
