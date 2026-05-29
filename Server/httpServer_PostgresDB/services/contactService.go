@@ -132,3 +132,22 @@ func UpdateContact(rw http.ResponseWriter, req *http.Request) {
 		Status: http.StatusOK,
 	})
 }
+
+func DeleteContact(rw http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+
+	_, err := database.DB.Exec("DELETE FROM contacts WHERE id=$1", id)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Failed to delete.",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(types.SuccessResponse{
+		Mssg:   "Contact deleted",
+		Status: http.StatusOK,
+	})
+}
