@@ -103,3 +103,32 @@ func GetContact(rw http.ResponseWriter, req *http.Request) {
 		Data:   contact,
 	})
 }
+
+func UpdateContact(rw http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	var c models.Contact
+	if err := json.NewDecoder(req.Body).Decode(&c); err != nil || c.Name == "" || c.Phone == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Invalid body, must fill name and phone",
+			Status: http.StatusBadRequest,
+			Error:  err,
+		})
+		return
+	}
+
+	_, err := database.DB.Exec("UPDATE contacts SET name=$1, phone=$2, description=$3 WHERE id=$4", c.Name, c.Phone, c.Description, id)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Failed to update",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(types.SuccessResponse{
+		Mssg:   "Contact updated",
+		Status: http.StatusOK,
+	})
+}

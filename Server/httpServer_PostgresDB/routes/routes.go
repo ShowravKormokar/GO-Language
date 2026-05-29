@@ -22,6 +22,7 @@ func RegisterRoutes() *mux.Router {
 	r.HandleFunc("/contacts", services.CreateContact).Methods("POST")
 	r.HandleFunc("/contacts", services.GetContacts).Methods("GET")
 	r.HandleFunc("/contacts/{id}", services.GetContact).Methods("GET")
+	r.HandleFunc("/contacts/{id}", services.UpdateContact).Methods("PUT")
 
 	return r
 }
