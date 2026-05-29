@@ -14,7 +14,7 @@ func CreateContact(rw http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(rw).Encode(types.ErrorResponse{
 			Mssg:   "Method not allowed",
 			Status: http.StatusMethodNotAllowed,
-			Error: nil,
+			Error:  nil,
 		})
 		return
 	}
@@ -52,5 +52,32 @@ func CreateContact(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(types.SuccessResponse{
 		Mssg:   "Contact Created Successfully.",
 		Status: http.StatusOK,
+	})
+}
+
+func GetContacts(rw http.ResponseWriter, req *http.Request) {
+	rows, err := database.DB.Query("SELECT id, name, phone, description, created_at FROM contacts")
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Failed to fetch",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+
+	defer rows.Close()
+
+	var contacts []models.Contact
+	for rows.Next() {
+		var c models.Contact
+		rows.Scan(&c.ID, &c.Name, &c.Phone, &c.Description, &c.CreatedAt)
+		contacts = append(contacts, c)
+	}
+	json.NewEncoder(rw).Encode(types.APIResponse{
+		Mssg:   "All contacts fetch successfully.",
+		Status: http.StatusOK,
+		Data:   contacts,
 	})
 }
