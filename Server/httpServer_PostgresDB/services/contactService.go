@@ -6,6 +6,8 @@ import (
 	"server_postgres/database"
 	"server_postgres/models"
 	"server_postgres/types"
+
+	"github.com/gorilla/mux"
 )
 
 func CreateContact(rw http.ResponseWriter, req *http.Request) {
@@ -79,5 +81,25 @@ func GetContacts(rw http.ResponseWriter, req *http.Request) {
 		Mssg:   "All contacts fetch successfully.",
 		Status: http.StatusOK,
 		Data:   contacts,
+	})
+}
+
+func GetContact(rw http.ResponseWriter, req *http.Request) {
+	id := mux.Vars(req)["id"]
+	var contact models.Contact
+	err := database.DB.QueryRow("SELECT id, name, phone, description, created_at FROM contacts WHERE id = $1", id).Scan(&contact.ID, &contact.Name, &contact.Phone, &contact.Description, &contact.CreatedAt)
+	if err != nil {
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Contact Not found",
+			Status: http.StatusNotFound,
+			Error:  err,
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(types.APIResponse{
+		Mssg:   "Contact found",
+		Status: http.StatusOK,
+		Data:   contact,
 	})
 }
