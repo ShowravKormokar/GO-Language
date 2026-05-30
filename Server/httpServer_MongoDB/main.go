@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"server_MongoDB/database"
+	"server_MongoDB/routes"
 )
 
 func main() {
 	database.ConnctMongo()
 
+	r := routes.RegisterRoutes()
+
 	fmt.Println("Server running on port:8000")
-	err := http.ListenAndServe(":8000", nil)
+	err := http.ListenAndServe(":8000", r)
 	if err != nil {
 		fmt.Println("Couldn't connect:", err)
 	}

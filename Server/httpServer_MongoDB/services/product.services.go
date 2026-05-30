@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"server_MongoDB/database"
 	"server_MongoDB/model"
@@ -25,6 +26,7 @@ func CreateProduct(rw http.ResponseWriter, rq *http.Request) {
 
 	var p model.Product
 	err := json.NewDecoder(rq.Body).Decode(&p)
+	fmt.Println(p.Title, p.Price, p.Qunatity, p.Status, p.Description)
 	if err != nil || p.Title == "" || p.Price < 0.0 || p.Qunatity < 0 || p.Status != (true || false) {
 		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(types.ErrorResponse{
@@ -37,7 +39,7 @@ func CreateProduct(rw http.ResponseWriter, rq *http.Request) {
 
 	p.Created_At = time.Now()
 
-	res, err := database.ProductCollection.InsertOne(context.Background(), &p)
+	res, err := database.ProductCollection.InsertOne(context.Background(), p)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(rw).Encode(types.ErrorResponse{
