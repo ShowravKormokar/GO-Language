@@ -20,12 +20,13 @@ func RegisterRoutes() *mux.Router {
 		})
 	}).Methods("GET")
 	r.HandleFunc("/products", services.CreateProduct).Methods("POST")
+	r.HandleFunc("/products", services.GetProducts).Methods("GET")
 
 	return r
 }
 
 /*
-curl -X POST http://localhost:8000/products \ 
-	-H "Content-Type: application/json" \ 
+curl -X POST http://localhost:8000/products \
+	-H "Content-Type: application/json" \
 	-d '{"title":"I Phone","description":"The latest model phone","price":1200.50,"quantity":10,"status":true}'
 */
