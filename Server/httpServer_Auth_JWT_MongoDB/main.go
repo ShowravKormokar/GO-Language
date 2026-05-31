@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -10,8 +11,8 @@ func main() {
 	// 2. Set up HTTP server with routes for registration and login
 	// 3. Implement JWT authentication for protected routes
 
-	fmt.Println("Server running on port:8080")
-	err := http.ListenAndServe(":8000", nil)
+	fmt.Println("Server running on port:8000")
+	err := http.ListenAndServe(os.Getenv("PORT"), nil)
 	if err != nil {
 		fmt.Println("Server couldn't connect:", err)
 	}
