@@ -10,6 +10,7 @@ import (
 	"server_MongoDB/types"
 	"time"
 
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -93,4 +94,27 @@ func GetProducts(rw http.ResponseWriter, rq *http.Request) {
 		Data:   products,
 	})
 
+}
+
+// Get product by id
+func GetProductByID(rw http.ResponseWriter, rq *http.Request) {
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	var p model.Product
+	err := database.ProductCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&p)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Product not found",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(types.DataResponse{
+		Mssg:   "Product found",
+		Status: http.StatusOK,
+		Data:   p,
+	})
 }
