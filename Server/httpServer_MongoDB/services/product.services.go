@@ -153,3 +153,25 @@ func UpdateProduct(rw http.ResponseWriter, rq *http.Request) {
 		Status: http.StatusOK,
 	})
 }
+
+// Delete product by id
+func DeleteProduct(rw http.ResponseWriter, rq *http.Request) {
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	_, err := database.ProductCollection.DeleteOne(context.Background(), bson.M{"_id": objId})
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Product not deleted",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+
+	json.NewEncoder(rw).Encode(types.SuccessResponse{
+		Mssg:   "Product deleted",
+		Status: http.StatusOK,
+	})
+}
