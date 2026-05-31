@@ -118,3 +118,38 @@ func GetProductByID(rw http.ResponseWriter, rq *http.Request) {
 		Data:   p,
 	})
 }
+
+// Update product by id
+func UpdateProduct(rw http.ResponseWriter, rq *http.Request) {
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	var p model.Product
+	err := json.NewDecoder(rq.Body).Decode(&p)
+	if err != nil || p.Title == "" || p.Price < 0.0 || p.Qunatity < 0 || p.Status != (true || false) {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Invalid body, must fill title, price, quantity and status true/false.",
+			Status: http.StatusBadRequest,
+			Error:  err,
+		})
+		return
+	}
+
+	update := bson.M{"$set": bson.M{"title": p.Title, "description": p.Description, "price": p.Price, "status": p.Status, "updated_at": time.Now()}}
+
+	_, err = database.ProductCollection.UpdateByID(context.Background(), objId, update)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(types.ErrorResponse{
+			Mssg:   "Product not updated",
+			Status: http.StatusInternalServerError,
+			Error:  err,
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(types.SuccessResponse{
+		Mssg:   "Product updated",
+		Status: http.StatusOK,
+	})
+}

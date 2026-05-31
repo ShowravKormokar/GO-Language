@@ -22,6 +22,7 @@ func RegisterRoutes() *mux.Router {
 	r.HandleFunc("/products", services.CreateProduct).Methods("POST")
 	r.HandleFunc("/products", services.GetProducts).Methods("GET")
 	r.HandleFunc("/products/{id}", services.GetProductByID).Methods("GET")
+	r.HandleFunc("/products/{id}", services.UpdateProduct).Methods("PUT")
 
 	return r
 }
