@@ -88,3 +88,60 @@ func RegisterAuthService(rw http.ResponseWriter, rq *http.Request) {
 		Message: "Registration successfull",
 	})
 }
+
+func LoginAuthService(rw http.ResponseWriter, rq *http.Request) {
+	if rq.Method != http.MethodPost {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	var u dto.LoginRequest
+	err := json.NewDecoder(rq.Body).Decode(&u)
+	fmt.Println("Body:", u.Email, u.Password)
+	if err != nil || u.Email == "" || u.Password == "" {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Invalid body, must fill email and password",
+		})
+		return
+	}
+
+	// Find user
+	var user models.User
+	err = database.UserCollection.FindOne(context.Background(), bson.M{"email": u.Email}).Decode(&user)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Invalid credentials",
+		})
+		return
+	}
+
+	// Match password
+	err = utils.CheckPassword(user.Password, u.Password)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Invalid credentials",
+		})
+		return
+	}
+
+	// Generate token
+
+	// Success Login Response
+	json.NewEncoder(rw).Encode(dto.DataResponse{
+		BasicResponse: dto.BasicResponse{
+			Success: true,
+			Message: "Login successfull",
+		},
+		Data: user,
+	})
+}

@@ -21,7 +21,8 @@ func RegisterRoutes() *mux.Router {
 			Message: "Server is alive and healthy",
 		})
 	}).Methods("GET")
-	r.HandleFunc("/register", services.RegisterAuthService).Methods("POST")
+	r.HandleFunc("/auth/register", services.RegisterAuthService).Methods("POST")
+	r.HandleFunc("/auth/login", services.LoginAuthService).Methods("POST")
 
 	return r
 }
