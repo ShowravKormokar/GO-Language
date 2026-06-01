@@ -22,11 +22,12 @@ func RegisterRoutes() *mux.Router {
 			Message: "Server is alive and healthy",
 		})
 	}).Methods("GET")
-	r.HandleFunc("/auth/register", services.RegisterAuthService).Methods("POST")
-	r.HandleFunc("/auth/login", services.LoginAuthService).Methods("POST")
+	r.HandleFunc("/api/auth/register", services.RegisterAuthService).Methods("POST")
+	r.HandleFunc("/api/auth/login", services.LoginAuthService).Methods("POST")
 
 	// Protected routes
-	r.Handle("/user/profile", middleware.JWTMiddleware(http.HandlerFunc(services.UserProfile))).Methods("GET")
+	r.Handle("/api/users/profile", middleware.JWTMiddleware(http.HandlerFunc(services.UserProfile))).Methods("GET")
+	r.Handle("/api/admin/users", middleware.JWTMiddleware(http.HandlerFunc(services.GetAllUsers))).Methods("GET")
 
 	return r
 }

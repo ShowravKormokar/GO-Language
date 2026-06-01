@@ -61,3 +61,38 @@ func UserProfile(rw http.ResponseWriter, rq *http.Request) {
 		Data: user,
 	})
 }
+
+func GetAllUsers(rw http.ResponseWriter, rq *http.Request) {
+	if rq.Method != http.MethodGet {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	var u []models.User
+	cursor, err := database.UserCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Faild to fetch users",
+		})
+		return
+	}
+
+	for cursor.Next(context.Background()) {
+		var p models.User
+		cursor.Decode(&p)
+		u = append(u, p)
+	}
+	json.NewEncoder(rw).Encode(dto.DataResponse{
+		BasicResponse: dto.BasicResponse{
+			Success: true,
+			Message: "Fetch all users",
+		},
+		Data: u,
+	})
+}
