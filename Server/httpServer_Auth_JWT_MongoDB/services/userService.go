@@ -24,7 +24,7 @@ func UserProfile(rw http.ResponseWriter, rq *http.Request) {
 		return
 	}
 
-	claims := rq.Context().Value(middleware.UserContextKey).(jwt.MapClaims)
+	claims := rq.Context().Value(middleware.ClaimsKey).(jwt.MapClaims)
 
 	userID := claims["user_id"].(string)
 	objID, err := primitive.ObjectIDFromHex(userID)
@@ -62,6 +62,7 @@ func UserProfile(rw http.ResponseWriter, rq *http.Request) {
 	})
 }
 
+// Admin only
 func GetAllUsers(rw http.ResponseWriter, rq *http.Request) {
 	if rq.Method != http.MethodGet {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
