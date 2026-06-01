@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"httpServer_JWT_MongoDB/dto"
+	"httpServer_JWT_MongoDB/services"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -20,6 +21,7 @@ func RegisterRoutes() *mux.Router {
 			Message: "Server is alive and healthy",
 		})
 	}).Methods("GET")
+	r.HandleFunc("/register", services.RegisterAuthService).Methods("POST")
 
 	return r
 }

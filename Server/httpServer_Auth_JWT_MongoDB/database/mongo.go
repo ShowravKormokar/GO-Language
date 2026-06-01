@@ -11,7 +11,7 @@ import (
 )
 
 var Client *mongo.Client
-var ProductCollection *mongo.Collection
+var UserCollection *mongo.Collection
 
 func ConnctMongo() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -23,7 +23,7 @@ func ConnctMongo() {
 	}
 
 	Client = client
-	ProductCollection = client.Database("productStore").Collection("products")
+	UserCollection = client.Database("userAuthStore").Collection("users")
 
 	fmt.Println("MongoDB connected successfully")
 }
