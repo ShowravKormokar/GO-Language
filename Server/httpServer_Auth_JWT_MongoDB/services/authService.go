@@ -115,7 +115,7 @@ func LoginAuthService(rw http.ResponseWriter, rq *http.Request) {
 	var user models.User
 	err = database.UserCollection.FindOne(context.Background(), bson.M{"email": u.Email}).Decode(&user)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(rw).Encode(dto.BasicResponse{
 			Success: false,
 			Message: "Invalid credentials",
@@ -126,7 +126,7 @@ func LoginAuthService(rw http.ResponseWriter, rq *http.Request) {
 	// Match password
 	err = utils.CheckPassword(user.Password, u.Password)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(rw).Encode(dto.BasicResponse{
 			Success: false,
 			Message: "Invalid credentials",
@@ -135,6 +135,15 @@ func LoginAuthService(rw http.ResponseWriter, rq *http.Request) {
 	}
 
 	// Generate token
+	token, err := utils.GenerateJWT(user.ID, user.Email, user.Role)
+	if err != nil || token == "" {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Somethings wrong",
+		})
+		return
+	}
 
 	// Success Login Response
 	json.NewEncoder(rw).Encode(dto.DataResponse{
@@ -142,6 +151,8 @@ func LoginAuthService(rw http.ResponseWriter, rq *http.Request) {
 			Success: true,
 			Message: "Login successfull",
 		},
-		Data: user,
+		Data: map[string]interface{}{
+			"token": token,
+		},
 	})
 }
