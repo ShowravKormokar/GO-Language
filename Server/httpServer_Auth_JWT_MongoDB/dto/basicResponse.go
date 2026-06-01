@@ -1,7 +1,7 @@
 package dto
 
 type BasicResponse struct {
-	Success string `json:"success"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
