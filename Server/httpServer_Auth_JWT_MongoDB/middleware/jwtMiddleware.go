@@ -42,7 +42,18 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		claims := token.Claims.(jwt.MapClaims)
+		claims, ok := token.Claims.(jwt.MapClaims)
+
+		if !ok {
+			rw.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(rw).Encode(
+				dto.BasicResponse{
+					Success: false,
+					Message: "Invalid token claims",
+				},
+			)
+			return
+		}
 
 		ctx := context.WithValue(rq.Context(), UserContextKey, claims)
 		next.ServeHTTP(rw, rq.WithContext(ctx))

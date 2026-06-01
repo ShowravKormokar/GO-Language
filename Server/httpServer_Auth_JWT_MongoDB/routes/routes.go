@@ -3,6 +3,7 @@ package routes
 import (
 	"encoding/json"
 	"httpServer_JWT_MongoDB/dto"
+	"httpServer_JWT_MongoDB/middleware"
 	"httpServer_JWT_MongoDB/services"
 	"net/http"
 
@@ -23,6 +24,9 @@ func RegisterRoutes() *mux.Router {
 	}).Methods("GET")
 	r.HandleFunc("/auth/register", services.RegisterAuthService).Methods("POST")
 	r.HandleFunc("/auth/login", services.LoginAuthService).Methods("POST")
+
+	// Protected routes
+	r.Handle("/user/profile", middleware.JWTMiddleware(http.HandlerFunc(services.UserProfile))).Methods("GET")
 
 	return r
 }
