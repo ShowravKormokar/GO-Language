@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -96,4 +97,43 @@ func GetAllUsers(rw http.ResponseWriter, rq *http.Request) {
 		},
 		Data: u,
 	})
+}
+
+func GetUserByID(rw http.ResponseWriter, rq *http.Request) {
+	if rq.Method != http.MethodGet {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	var u models.User
+	err := database.UserCollection.FindOne(context.Background(), bson.M{"_id": objId}).Decode(&u)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "User not found",
+		})
+		return
+	}
+
+	json.NewEncoder(rw).Encode(dto.DataResponse{
+		BasicResponse: dto.BasicResponse{
+			Success: true,
+			Message: "User found",
+		},
+		Data: u,
+	})
+}
+
+func UpdateUser(rw http.ResponseWriter, rq *http.Request) {}
+
+func DeleteUser(rw http.ResponseWriter, rq *http.Request) {
+
 }
