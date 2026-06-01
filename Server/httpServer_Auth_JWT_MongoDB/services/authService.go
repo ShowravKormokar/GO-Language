@@ -7,9 +7,11 @@ import (
 	"httpServer_JWT_MongoDB/database"
 	"httpServer_JWT_MongoDB/dto"
 	"httpServer_JWT_MongoDB/models"
+	"httpServer_JWT_MongoDB/utils"
 	"net/http"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -18,12 +20,12 @@ func RegisterAuthService(rw http.ResponseWriter, rq *http.Request) {
 		rw.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(rw).Encode(dto.BasicResponse{
 			Success: false,
-			Message: "Method not allowes",
+			Message: "Method not allowed",
 		})
 		return
 	}
 
-	var u models.User
+	var u dto.RegisterRequest
 	err := json.NewDecoder(rq.Body).Decode(&u)
 	fmt.Println("Body:", u.Name, u.Email, u.Password)
 	if err != nil || u.Email == "" || u.Password == "" || u.Name == "" {
@@ -37,7 +39,7 @@ func RegisterAuthService(rw http.ResponseWriter, rq *http.Request) {
 
 	// Check email already exist or not
 	var existingUser models.User
-	err = database.UserCollection.FindOne(context.Background(), map[string]interface{}{
+	err = database.UserCollection.FindOne(context.Background(), bson.M{
 		"email": u.Email,
 	}).Decode(&existingUser)
 	if err == nil {
@@ -50,10 +52,27 @@ func RegisterAuthService(rw http.ResponseWriter, rq *http.Request) {
 	}
 
 	// Hash the pass
+	hashedPassword, err := utils.HashPassword(u.Password)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Somethings wrong",
+		})
+		return
+	}
 
-	u.CreatedAt = time.Now()
-	u.Role = "user"
-	res, err := database.UserCollection.InsertOne(context.Background(), u)
+	fmt.Println("Hash Pass:", hashedPassword)
+
+	user := models.User{
+		Name:      u.Name,
+		Email:     u.Email,
+		Password:  hashedPassword,
+		Role:      "user",
+		CreatedAt: time.Now(),
+	}
+
+	res, err := database.UserCollection.InsertOne(context.Background(), user)
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(rw).Encode(dto.BasicResponse{
@@ -63,7 +82,7 @@ func RegisterAuthService(rw http.ResponseWriter, rq *http.Request) {
 		return
 	}
 
-	u.ID = res.InsertedID.(primitive.ObjectID).Hex()
+	user.ID = res.InsertedID.(primitive.ObjectID).Hex()
 	json.NewEncoder(rw).Encode(dto.BasicResponse{
 		Success: true,
 		Message: "Registration successfull",
