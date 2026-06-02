@@ -159,8 +159,8 @@ func UpdateUser(rw http.ResponseWriter, rq *http.Request) {
 
 	update := bson.M{
 		"$set": bson.M{
-			"name":      user.Name,
-			"email":     user.Email,
+			"name":       user.Name,
+			"email":      user.Email,
 			"updated_at": time.Now(),
 		},
 	}
@@ -182,5 +182,29 @@ func UpdateUser(rw http.ResponseWriter, rq *http.Request) {
 }
 
 func DeleteUser(rw http.ResponseWriter, rq *http.Request) {
+	if rq.Method != http.MethodDelete {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
 
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	_, err := database.UserCollection.DeleteOne(context.Background(), bson.M{"_id": objId})
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Failed to delete user",
+		})
+		return
+	}
+	json.NewEncoder(rw).Encode(dto.BasicResponse{
+		Success: true,
+		Message: "User deleted successfully",
+	})
 }
