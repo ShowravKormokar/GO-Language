@@ -30,6 +30,7 @@ func RegisterRoutes() *mux.Router {
 
 	// Protected routes
 	r.Handle("/api/users/profile", middleware.JWTMiddleware(http.HandlerFunc(services.UserProfile))).Methods("GET")
+	r.Handle("/api/users/profile/{id}", middleware.JWTMiddleware(http.HandlerFunc(services.UpdateUser))).Methods("PUT")
 
 	// Protected & Admin only route
 	r.Handle("/api/admin/users", middleware.JWTMiddleware(middleware.AdminOnly(http.HandlerFunc(services.GetAllUsers)))).Methods("GET")

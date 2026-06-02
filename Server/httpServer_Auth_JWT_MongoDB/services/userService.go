@@ -8,6 +8,7 @@ import (
 	"httpServer_JWT_MongoDB/middleware"
 	"httpServer_JWT_MongoDB/models"
 	"net/http"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
@@ -132,7 +133,53 @@ func GetUserByID(rw http.ResponseWriter, rq *http.Request) {
 	})
 }
 
-func UpdateUser(rw http.ResponseWriter, rq *http.Request) {}
+func UpdateUser(rw http.ResponseWriter, rq *http.Request) {
+	if rq.Method != http.MethodPut {
+		rw.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Method not allowed",
+		})
+		return
+	}
+
+	id := mux.Vars(rq)["id"]
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	var user models.User
+	err := json.NewDecoder(rq.Body).Decode(&user)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Invalid request body",
+		})
+		return
+	}
+
+	update := bson.M{
+		"$set": bson.M{
+			"name":      user.Name,
+			"email":     user.Email,
+			"updated_at": time.Now(),
+		},
+	}
+
+	_, err = database.UserCollection.UpdateOne(context.Background(), bson.M{"_id": objId}, update)
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(dto.BasicResponse{
+			Success: false,
+			Message: "Failed to update user",
+		})
+		return
+	}
+
+	json.NewEncoder(rw).Encode(dto.BasicResponse{
+		Success: true,
+		Message: "User updated successfully",
+	})
+}
 
 func DeleteUser(rw http.ResponseWriter, rq *http.Request) {
 
