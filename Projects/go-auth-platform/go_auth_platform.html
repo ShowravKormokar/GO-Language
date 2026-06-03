@@ -1,0 +1,3085 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>go-auth-platform — IAM System Roadmap</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --surface3: #1f2d42;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.12);
+      --text: #e8eaf0;
+      --muted: #8892a4;
+      --muted2: #5c6880;
+      --pro: #4ade80;
+      --con: #f87171;
+      --warn: #f7c948;
+
+      --p1: #00d4aa;
+      --p1d: rgba(0, 212, 170, 0.12);
+      --p2: #7c6af7;
+      --p2d: rgba(124, 106, 247, 0.12);
+      --p3: #f7c948;
+      --p3d: rgba(247, 201, 72, 0.12);
+      --p4: #f472b6;
+      --p4d: rgba(244, 114, 182, 0.12);
+      --p5: #38bdf8;
+      --p5d: rgba(56, 189, 248, 0.12);
+      --p6: #fb923c;
+      --p6d: rgba(251, 146, 60, 0.12);
+      --p7: #a3e635;
+      --p7d: rgba(163, 230, 53, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 54px;
+      background: rgba(10, 14, 26, .95);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .tl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .tl-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--p1d);
+      border: 1px solid rgba(0, 212, 170, .3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .tl-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .tl-text span {
+      color: var(--p1);
+    }
+
+    .topbar-nav {
+      display: flex;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .topbar-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .topbar-nav a {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 11px;
+      border-radius: 5px;
+      white-space: nowrap;
+      transition: all .2s;
+    }
+
+    .topbar-nav a:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .back-btn {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--p1);
+      border: 1px solid rgba(0, 212, 170, .3);
+      padding: 5px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+
+    .back-btn:hover {
+      background: var(--p1d);
+    }
+
+    /* ── STICKY NAV ── */
+    nav.snav {
+      position: sticky;
+      top: 54px;
+      z-index: 99;
+      background: rgba(10, 14, 26, .93);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      overflow-x: auto;
+      padding: 0 20px;
+      scrollbar-width: none;
+    }
+
+    nav.snav::-webkit-scrollbar {
+      display: none;
+    }
+
+    nav.snav a {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 11px 12px;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all .2s;
+    }
+
+    nav.snav a:hover {
+      color: var(--text);
+      border-color: var(--p1);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: calc(54px + 60px) 40px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 15% 50%, rgba(0, 212, 170, .09), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 50%, rgba(124, 106, 247, .08), transparent 70%),
+        radial-gradient(ellipse 30% 30% at 50% 100%, rgba(247, 201, 72, .06), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--p1);
+      border: 1px solid rgba(0, 212, 170, .3);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 22px;
+      background: rgba(0, 212, 170, .06);
+    }
+
+    .hero-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--p1);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .5;
+        transform: scale(1.4)
+      }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(26px, 5vw, 56px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -1.5px;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 span {
+      color: var(--p1);
+    }
+
+    .hero h1 .mono {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(18px, 3vw, 36px);
+      color: var(--p3);
+      font-weight: 700;
+    }
+
+    .hero p {
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 32px;
+      font-size: 15px;
+    }
+
+    .hero-pills {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      max-width: 800px;
+      margin: 0 auto 36px;
+    }
+
+    .hp {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      transition: all .2s;
+      cursor: default;
+    }
+
+    .hp:hover {
+      transform: translateY(-2px);
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hs {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 12px 20px;
+      text-align: center;
+    }
+
+    .hs-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--p1);
+      line-height: 1;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .hs-lbl {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 60px 0;
+    }
+
+    section+section {
+      border-top: 1px solid var(--border);
+    }
+
+    .s-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .s-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+
+    .s-sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      max-width: 680px;
+    }
+
+    /* ── CARDS ── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+
+    .card h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card p,
+    .card li {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .card ul {
+      padding-left: 14px;
+    }
+
+    .card li {
+      list-style: disc;
+      margin-bottom: 3px;
+    }
+
+    .card li strong {
+      color: var(--text);
+    }
+
+    /* ── INFO BLOCK ── */
+    .info-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .info-block h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .info-block p,
+    .info-block li {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .info-block ul {
+      padding-left: 14px;
+    }
+
+    .info-block li {
+      list-style: disc;
+      margin-bottom: 3px;
+    }
+
+    .info-block li strong {
+      color: var(--text);
+    }
+
+    /* ===== Tree Wrapper ===== */
+
+    .tree-container {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+    }
+
+    /* ===== Header ===== */
+
+    .tree-header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 14px 20px;
+    }
+
+    .tree-title {
+      color: #8b949e;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ===== Tree ===== */
+
+    .tree {
+      margin: 0;
+      padding: 24px;
+      overflow-x: auto;
+      white-space: pre;
+      tab-size: 4;
+
+      font-family: "Space Mono", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+
+      color: #cdd9e5;
+    }
+
+    /* Custom Scrollbar */
+
+    .tree::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .tree::-webkit-scrollbar-thumb {
+      background: #30363d;
+      border-radius: 20px;
+    }
+
+    /* ===== Syntax Colors ===== */
+
+    .tree-root {
+      color: var(--p1);
+      font-weight: 700;
+    }
+
+    .tree-dir {
+      color: var(--p5);
+      font-weight: 700;
+    }
+
+    .tree-config {
+      color: var(--p1);
+      font-weight: 700;
+    }
+
+    .tree-model {
+      color: var(--p6);
+      font-weight: 700;
+    }
+
+    .tree-handler {
+      color: var(--p7);
+      font-weight: 700;
+    }
+
+    .tree-mw {
+      color: var(--p4);
+      font-weight: 700;
+    }
+
+    .tree-util {
+      color: var(--p3);
+      font-weight: 700;
+    }
+
+    .tree-file {
+      color: #cdd9e5;
+    }
+
+    .tree-cmt {
+      color: var(--muted2);
+    }
+
+    /* ===== Mobile ===== */
+
+    @media (max-width: 768px) {
+      .tree {
+        font-size: 11px;
+        padding: 18px;
+      }
+    }
+
+    /* ── CODE ── */
+    .code-bar {
+      background: #161b22;
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .dr {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ff5f57;
+    }
+
+    .dy {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #febc2e;
+    }
+
+    .dg {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #28c840;
+    }
+
+    .cb-l {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      margin-left: 5px;
+    }
+
+    .code-block {
+      margin: 0;
+      border-radius: 0 0 10px 10px;
+      overflow: auto;
+    }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 20px !important;
+      background: #0d1117 !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 13px !important;
+      line-height: 1.8 !important;
+      border: 1px solid var(--border);
+      border-top: none;
+    }
+
+    .code-block code {
+      font-family: inherit;
+    }
+
+    pre[class*="language-"] {
+      margin: 0;
+      border-radius: 0 0 10px 10px;
+    }
+
+    @media(max-width:768px) {
+      .code-block pre {
+        font-size: 12px !important;
+        padding: 16px !important;
+      }
+    }
+
+    /* ── TIMELINE / ROADMAP ── */
+    .timeline {
+      position: relative;
+      padding-left: 0;
+    }
+
+    .tl-part {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      margin-bottom: 28px;
+      align-items: start;
+    }
+
+    @media(max-width:640px) {
+      .tl-part {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tl-left {
+      text-align: right;
+      padding-top: 4px;
+    }
+
+    .tl-part-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      display: block;
+    }
+
+    .tl-time-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .tl-right {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+      border-left: 3px solid var(--ac, var(--p1));
+    }
+
+    .tl-right h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--ac, var(--p1));
+      margin-bottom: 6px;
+    }
+
+    .tl-right .tl-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .tl-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tl-item {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .tl-goal {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── API ENDPOINT ── */
+    .api-group {
+      margin-bottom: 28px;
+    }
+
+    .api-group-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--p1);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .endpoint {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      transition: border-color .2s;
+    }
+
+    .endpoint:hover {
+      border-color: var(--border2);
+    }
+
+    .method {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .m-post {
+      background: rgba(74, 222, 128, .15);
+      color: var(--pro);
+    }
+
+    .m-get {
+      background: rgba(56, 189, 248, .15);
+      color: var(--p5);
+    }
+
+    .m-patch {
+      background: rgba(247, 201, 72, .15);
+      color: var(--p3);
+    }
+
+    .m-delete {
+      background: rgba(248, 113, 113, .12);
+      color: var(--con);
+    }
+
+    .ep-path {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .ep-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .ep-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .ep-badge {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .eb-auth {
+      background: rgba(0, 212, 170, .1);
+      color: var(--p1);
+    }
+
+    .eb-public {
+      background: rgba(163, 230, 53, .1);
+      color: var(--p7);
+    }
+
+    .eb-admin {
+      background: rgba(248, 113, 113, .1);
+      color: var(--con);
+    }
+
+    .eb-manager {
+      background: rgba(247, 201, 72, .1);
+      color: var(--p3);
+    }
+
+    .eb-user {
+      background: rgba(56, 189, 248, .1);
+      color: var(--p5);
+    }
+
+    .ep-body {
+      flex: 1;
+    }
+
+    /* ── PERMISSION TABLE ── */
+    .perm-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .perm-table th {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .perm-table td {
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: var(--muted);
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      vertical-align: middle;
+    }
+
+    .perm-table td:first-child {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text);
+    }
+
+    .perm-table tr:hover td {
+      background: rgba(255, 255, 255, .02);
+    }
+
+    .perm-yes {
+      color: var(--pro);
+      font-size: 16px;
+    }
+
+    .perm-no {
+      color: var(--con);
+      font-size: 14px;
+    }
+
+    .perm-own {
+      color: var(--p3);
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    /* ── DB SCHEMA ── */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .schema-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .schema-header {
+      padding: 12px 16px;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .schema-field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, .04);
+      font-size: 11px;
+    }
+
+    .schema-field:last-child {
+      border-bottom: none;
+    }
+
+    .sf-name {
+      font-family: 'Space Mono', monospace;
+      color: var(--text);
+    }
+
+    .sf-type {
+      font-family: 'Space Mono', monospace;
+      color: var(--p5);
+      font-size: 10px;
+    }
+
+    .sf-pk {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--p3d);
+      color: var(--p3);
+    }
+
+    .sf-fk {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--p2d);
+      color: var(--p2);
+    }
+
+    .sf-idx {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--p1d);
+      color: var(--p1);
+    }
+
+    .sf-uni {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: var(--p4d);
+      color: var(--p4);
+    }
+
+    /* ── TAGS / BADGES ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── PRO CON ── */
+    .pro-con-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    @media(max-width:560px) {
+      .pro-con-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pro-list,
+    .con-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+
+    .pro-list h4 {
+      color: var(--pro);
+      font-size: 10px;
+      letter-spacing: 1px;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 10px;
+    }
+
+    .con-list h4 {
+      color: var(--con);
+      font-size: 10px;
+      letter-spacing: 1px;
+      font-family: 'Space Mono', monospace;
+      margin-bottom: 10px;
+    }
+
+    .pro-list li,
+    .con-list li {
+      list-style: none;
+      padding-left: 18px;
+      position: relative;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .pro-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--pro);
+      font-weight: 700;
+    }
+
+    .con-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--p3);
+    }
+
+    /* ── DIAGRAM ── */
+    .diagram-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      margin: 14px 0;
+      overflow-x: auto;
+    }
+
+    .diagram-wrap svg {
+      max-width: 100%;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── LEARN ITEMS ── */
+    .learn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .learn-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .li-check {
+      color: var(--pro);
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .li-text {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .li-text strong {
+      color: var(--text);
+      display: block;
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    /* ── PERF METRICS ── */
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .perf-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .perf-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--p1);
+      line-height: 1;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .perf-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .perf-note {
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    /* ── HBOX ── */
+    .hbox {
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 12px 0;
+    }
+
+    .hbox.info {
+      background: rgba(0, 212, 170, .07);
+      border: 1px solid rgba(0, 212, 170, .2);
+    }
+
+    .hbox.info h4 {
+      color: var(--p1);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+
+    .hbox.warn {
+      background: rgba(247, 201, 72, .07);
+      border: 1px solid rgba(247, 201, 72, .2);
+    }
+
+    .hbox.warn h4 {
+      color: var(--p3);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 7px;
+    }
+
+    .hbox p,
+    .hbox li {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .hbox li {
+      list-style: none;
+      padding: 2px 0 2px 16px;
+      position: relative;
+    }
+
+    .hbox li::before {
+      content: '→ ';
+      position: absolute;
+      left: 0;
+      color: var(--p1);
+    }
+
+    .hbox.warn li::before {
+      color: var(--p3);
+    }
+
+    /* ── VERDICT ── */
+    .verdict {
+      background: linear-gradient(135deg, rgba(0, 212, 170, .06), rgba(124, 106, 247, .06) 50%, rgba(247, 201, 72, .05));
+      border: 1px solid rgba(0, 212, 170, .15);
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-top: 36px;
+    }
+
+    .verdict h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: var(--p1);
+    }
+
+    .verdict-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .vi strong {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .vi span {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    /* ── STEP INDICATOR ── */
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    /* ── TABLE SCROLL ── */
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    .table-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .table-scroll::-webkit-scrollbar-track {
+      background: var(--surface);
+    }
+
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 2px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      border-top: 1px solid var(--border);
+    }
+
+    @media(max-width:768px) {
+      .hero {
+        padding: calc(54px+44px) 20px 44px;
+      }
+
+      section {
+        padding: 40px 0;
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-nav {
+        display: none;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <a href="index.html" class="tl">
+      <div class="tl-icon">🔐</div>
+      <div class="tl-text"><span>go-auth</span>-platform</div>
+    </a>
+    <a href="index.html" class="back-btn">← Index</a>
+  </header>
+
+  <!-- ═══ STICKY NAV ═══ -->
+  <nav class="snav">
+    <a href="#overview">§1 Overview</a>
+    <a href="#architecture">§2 Architecture</a>
+    <a href="#structure">§3 Folder</a>
+    <a href="#models">§4 Models</a>
+    <a href="#schema">§5 DB Schema</a>
+    <a href="#permissions">§6 Permissions</a>
+    <a href="#apis">§7 APIs</a>
+    <a href="#jwt">§8 JWT+Cookies</a>
+    <a href="#deps">§9 Dependencies</a>
+    <a href="#roadmap">§10 Roadmap</a>
+    <a href="#learn">§11 Learn</a>
+    <a href="#perf">§12 Performance</a>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <div class="hero-badge">
+      <div class="hero-dot"></div>Industry-Level IAM Project — Complete Roadmap
+    </div>
+    <h1>Build <span>Production-Ready</span><br><span class="mono">go-auth-platform</span></h1>
+    <p>A complete Identity & Access Management (IAM) system built in Go — JWT, RBAC, HttpOnly Cookies, Token
+      Blacklisting, Pagination, Search, and Clean Architecture. Industry-standard. From zero to production.</p>
+    <div class="hero-pills">
+      <div class="hp" style="background:var(--p1d);color:var(--p1);border-color:rgba(0,212,170,.3)">🔐 JWT Auth</div>
+      <div class="hp" style="background:var(--p2d);color:var(--p2);border-color:rgba(124,106,247,.3)">👑 RBAC Roles
+      </div>
+      <div class="hp" style="background:var(--p3d);color:var(--p3);border-color:rgba(247,201,72,.3)">🍪 HttpOnly Cookies
+      </div>
+      <div class="hp" style="background:var(--p4d);color:var(--p4);border-color:rgba(244,114,182,.3)">🚫 Token Blacklist
+      </div>
+      <div class="hp" style="background:var(--p5d);color:var(--p5);border-color:rgba(56,189,248,.3)">📄 Pagination</div>
+      <div class="hp" style="background:var(--p6d);color:var(--p6);border-color:rgba(251,146,60,.3)">🔍 Search & Filter
+      </div>
+      <div class="hp" style="background:var(--p7d);color:var(--p7);border-color:rgba(163,230,53,.3)">🏗️ Modular
+        Monolith</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-val">500–1500</span><span class="hs-lbl">Req/sec</span></div>
+      <div class="hs"><span class="hs-val">&lt;5ms</span><span class="hs-lbl">JWT Verify</span></div>
+      <div class="hs"><span class="hs-val">15min</span><span class="hs-lbl">Access TTL</span></div>
+      <div class="hs"><span class="hs-val">7days</span><span class="hs-lbl">Refresh TTL</span></div>
+      <div class="hs"><span class="hs-val">4+</span><span class="hs-lbl">Roles</span></div>
+      <div class="hs"><span class="hs-val">~17days</span><span class="hs-lbl">Build Time</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ OVERVIEW ═══ -->
+  <section id="overview">
+    <div class="container">
+      <div class="s-label">Section 01 · Project Overview</div>
+      <div class="s-title">What Is go-auth-platform?</div>
+      <p class="s-sub">A backend-only Identity and Access Management API. No frontend. Pure REST API system —
+        authentication, authorization, user management, role-based access control, and secure session handling built for
+        scale.</p>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p1)"></span>Project Name Options</h4>
+          <ul>
+            <li><strong>go-auth-platform</strong> — clear, descriptive, beginner-friendly</li>
+            <li><strong>identity-service</strong> — industry-standard microservice naming</li>
+            <li><strong>authcore</strong> — compact, modern naming style</li>
+            <li><strong>iam-service</strong> — matches enterprise IAM terminology</li>
+          </ul>
+          <div class="hbox info" style="margin-top:10px">
+            <h4>RECOMMENDED</h4>
+            <p><strong style="color:var(--text)">go-auth-platform</strong> — best for portfolio projects. <strong
+                style="color:var(--text)">identity-service</strong> — best for microservice naming.</p>
+          </div>
+        </div>
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p2)"></span>System Features</h4>
+          <ul>
+            <li><strong>Authentication:</strong> Register, Login, Logout, Token Refresh</li>
+            <li><strong>Authorization:</strong> Role-based access control (RBAC)</li>
+            <li><strong>Token Strategy:</strong> Access (15min) + Refresh (7d) + Blacklist</li>
+            <li><strong>Cookie Strategy:</strong> HttpOnly, Secure, SameSiteStrict</li>
+            <li><strong>User Management:</strong> Profile CRUD + Admin operations</li>
+            <li><strong>Pagination:</strong> Cursor + offset pagination with metadata</li>
+            <li><strong>Search:</strong> Full-text ILIKE, filter by role/status</li>
+            <li><strong>Audit logging:</strong> Track sensitive operations</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- What it handles -->
+      <div class="grid-4">
+        <div class="card" style="border-top:3px solid var(--p1)">
+          <div style="font-size:28px;margin-bottom:10px">🔐</div>
+          <h4 style="color:var(--p1)">Authentication</h4>
+          <ul>
+            <li>Secure registration</li>
+            <li>bcrypt password hashing</li>
+            <li>JWT access tokens</li>
+            <li>Refresh token rotation</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p2)">
+          <div style="font-size:28px;margin-bottom:10px">👑</div>
+          <h4 style="color:var(--p2)">Authorization</h4>
+          <ul>
+            <li>4-level role hierarchy</li>
+            <li>Per-route role guards</li>
+            <li>Permission matrix</li>
+            <li>Admin superpower access</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p3)">
+          <div style="font-size:28px;margin-bottom:10px">🍪</div>
+          <h4 style="color:var(--p3)">Cookie Security</h4>
+          <ul>
+            <li>HttpOnly prevents XSS</li>
+            <li>Secure (HTTPS only)</li>
+            <li>SameSite prevents CSRF</li>
+            <li>Auto-set by backend</li>
+          </ul>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p4)">
+          <div style="font-size:28px;margin-bottom:10px">🚫</div>
+          <h4 style="color:var(--p4)">Token Blacklist</h4>
+          <ul>
+            <li>JTI-based revocation</li>
+            <li>Logout invalidation</li>
+            <li>DB-stored expiry</li>
+            <li>Automatic cleanup</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ARCHITECTURE ═══ -->
+  <section id="architecture">
+    <div class="container">
+      <div class="s-label">Section 02 · System Architecture</div>
+      <div class="s-title">Architecture & Design Patterns</div>
+      <p class="s-sub"><span style="color:#00d4aa; font-weight: bold;">Modular Monolith</span> first — clean separation of concerns that can
+        be split into microservices later.
+        MVC + Service + Repository pattern with strict layer boundaries.</p>
+
+      <!-- Architecture diagram -->
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" style="font-family:'Space Mono',monospace">
+          <defs>
+            <marker id="aa" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0,7 2.5,0 5" fill="#00d4aa" />
+            </marker>
+            <marker id="ab" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0,7 2.5,0 5" fill="#8892a4" />
+            </marker>
+          </defs>
+
+          <!-- Client -->
+          <rect x="280" y="8" width="140" height="38" rx="8" fill="rgba(0,212,170,.12)" stroke="rgba(0,212,170,.4)"
+            stroke-width="1.5" />
+          <text x="350" y="23" text-anchor="middle" fill="#00d4aa" font-size="10" font-weight="bold">Client
+            (HTTP)</text>
+          <text x="350" y="38" text-anchor="middle" fill="#8892a4" font-size="8">Browser / Mobile / Postman</text>
+          <line x1="350" y1="46" x2="350" y2="64" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- HTTP Server -->
+          <rect x="240" y="64" width="220" height="36" rx="7" fill="rgba(0,212,170,.18)" stroke="#00d4aa"
+            stroke-width="2" />
+          <text x="350" y="79" text-anchor="middle" fill="#00d4aa" font-size="10" font-weight="bold">HTTP Server</text>
+          <text x="350" y="93" text-anchor="middle" fill="#8892a4" font-size="8">gorilla/mux — Routing</text>
+          <line x1="350" y1="100" x2="350" y2="114" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- Middleware Chain (horizontal) -->
+          <rect x="40" y="114" width="620" height="44" rx="8" fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)"
+            stroke-width="1.5" />
+          <text x="350" y="130" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold">MIDDLEWARE
+            LAYER</text>
+          <text x="85" y="150" text-anchor="middle" fill="#8892a4" font-size="8">Recovery</text>
+          <text x="185" y="150" text-anchor="middle" fill="#8892a4" font-size="8">Logger</text>
+          <text x="285" y="150" text-anchor="middle" fill="#8892a4" font-size="8">CORS</text>
+          <text x="385" y="150" text-anchor="middle" fill="#8892a4" font-size="8">JWT Auth</text>
+          <text x="485" y="150" text-anchor="middle" fill="#8892a4" font-size="8">Role Guard</text>
+          <text x="600" y="150" text-anchor="middle" fill="#8892a4" font-size="8">Request ID</text>
+          <!-- Dividers -->
+          <line x1="133" y1="120" x2="133" y2="152" stroke="rgba(244,114,182,.2)" stroke-width="1" />
+          <line x1="233" y1="120" x2="233" y2="152" stroke="rgba(244,114,182,.2)" stroke-width="1" />
+          <line x1="333" y1="120" x2="333" y2="152" stroke="rgba(244,114,182,.2)" stroke-width="1" />
+          <line x1="433" y1="120" x2="433" y2="152" stroke="rgba(244,114,182,.2)" stroke-width="1" />
+          <line x1="533" y1="120" x2="533" y2="152" stroke="rgba(244,114,182,.2)" stroke-width="1" />
+          <line x1="350" y1="158" x2="350" y2="172" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- Handler Layer -->
+          <rect x="80" y="172" width="540" height="44" rx="7" fill="rgba(163,230,53,.08)" stroke="rgba(163,230,53,.3)"
+            stroke-width="1.5" />
+          <text x="350" y="188" text-anchor="middle" fill="#a3e635" font-size="10" font-weight="bold">HANDLER /
+            CONTROLLER LAYER</text>
+          <text x="175" y="208" text-anchor="middle" fill="#8892a4" font-size="8">auth_handler.go</text>
+          <text x="350" y="208" text-anchor="middle" fill="#8892a4" font-size="8">user_handler.go</text>
+          <text x="525" y="208" text-anchor="middle" fill="#8892a4" font-size="8">admin_handler.go</text>
+          <line x1="233" y1="178" x2="233" y2="210" stroke="rgba(163,230,53,.2)" stroke-width="1" />
+          <line x1="467" y1="178" x2="467" y2="210" stroke="rgba(163,230,53,.2)" stroke-width="1" />
+          <line x1="350" y1="216" x2="350" y2="230" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- Service Layer -->
+          <rect x="80" y="230" width="540" height="44" rx="7" fill="rgba(56,189,248,.08)" stroke="rgba(56,189,248,.3)"
+            stroke-width="1.5" />
+          <text x="350" y="246" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="bold">SERVICE / BUSINESS
+            LOGIC LAYER</text>
+          <text x="175" y="266" text-anchor="middle" fill="#8892a4" font-size="8">auth_service.go</text>
+          <text x="350" y="266" text-anchor="middle" fill="#8892a4" font-size="8">user_service.go</text>
+          <text x="525" y="266" text-anchor="middle" fill="#8892a4" font-size="8">role_service.go</text>
+          <line x1="233" y1="236" x2="233" y2="268" stroke="rgba(56,189,248,.2)" stroke-width="1" />
+          <line x1="467" y1="236" x2="467" y2="268" stroke="rgba(56,189,248,.2)" stroke-width="1" />
+          <line x1="350" y1="274" x2="350" y2="288" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- Repository Layer -->
+          <rect x="80" y="288" width="540" height="44" rx="7" fill="rgba(251,146,60,.08)" stroke="rgba(251,146,60,.3)"
+            stroke-width="1.5" />
+          <text x="350" y="304" text-anchor="middle" fill="#fb923c" font-size="10" font-weight="bold">REPOSITORY / DATA
+            ACCESS LAYER</text>
+          <text x="145" y="324" text-anchor="middle" fill="#8892a4" font-size="8">user_repo.go</text>
+          <text x="270" y="324" text-anchor="middle" fill="#8892a4" font-size="8">role_repo.go</text>
+          <text x="395" y="324" text-anchor="middle" fill="#8892a4" font-size="8">refresh_repo.go</text>
+          <text x="540" y="324" text-anchor="middle" fill="#8892a4" font-size="8">blacklist_repo.go</text>
+          <line x1="350" y1="332" x2="350" y2="346" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aa)" />
+
+          <!-- PostgreSQL -->
+          <rect x="240" y="346" width="220" height="28" rx="7" fill="rgba(51,103,145,.2)" stroke="#336791"
+            stroke-width="2" />
+          <text x="350" y="364" text-anchor="middle" fill="#38bdf8" font-size="10" font-weight="bold">PostgreSQL (GORM
+            ORM)</text>
+
+          <!-- Dependency rule label -->
+          <text x="16" y="200" fill="#6272a4" font-size="8" writing-mode="vertical-rl">Dependencies</text>
+          <line x1="28" y1="172" x2="28" y2="290" stroke="#6272a4" stroke-width="1" stroke-dasharray="3,2"
+            marker-end="url(#ab)" />
+          <text x="16" y="290" fill="#6272a4" font-size="8" writing-mode="vertical-rl">→ downward only</text>
+        </svg>
+      </div>
+
+      <!-- Pattern description -->
+      <div class="grid-2" style="margin-top:8px">
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p1)"></span>Design Patterns Used</h4>
+          <ul>
+            <li><strong>MVC:</strong> Handler (Controller) → Service (Model+Logic) → View (JSON response)</li>
+            <li><strong>Repository Pattern:</strong> Data access abstracted behind interfaces</li>
+            <li><strong>Service Layer:</strong> All business logic lives here, never in handlers</li>
+            <li><strong>Dependency Injection:</strong> Dependencies injected via constructor, not global state</li>
+            <li><strong>Middleware Chain:</strong> Request/response pipeline with ordered interceptors</li>
+            <li><strong>DTO Pattern:</strong> Separate request/response types from DB models</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p2)"></span>Architecture Decisions & Why</h4>
+          <ul>
+            <li><strong>Modular Monolith first:</strong> Deploy as one binary, split into services later with interfaces
+              already defined</li>
+            <li><strong>Interface-driven repos:</strong> Swap PostgreSQL for mock in tests — zero code change in service
+              layer</li>
+            <li><strong>No global state:</strong> All dependencies passed via struct constructors</li>
+            <li><strong>Cookie over Bearer:</strong> HttpOnly cookie prevents JS from stealing tokens (XSS protection)
+            </li>
+            <li><strong>JTI blacklist:</strong> Store token ID, not full JWT. Faster lookup, smaller storage</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOLDER STRUCTURE ═══ -->
+  <section id="structure">
+    <div class="container">
+      <div class="s-label">Section 03 · Project Structure</div>
+      <div class="s-title">Folder & File Structure</div>
+      <p class="s-sub">Every file has a single, clear purpose. Never mix concerns. If it grows too big, split it.</p>
+
+      <div class="tree-container">
+        <div class="tree-header">
+          <span class="tree-title">Project Structure</span>
+        </div>
+
+        <pre class="tree">
+                <span class="tree-root">go-auth-platform/</span>
+                ├── <span class="tree-dir">cmd/</span> <span class="tree-cmt"># Application entrypoints</span>
+                │   └── <span class="tree-dir">server/</span>
+                │       └── <span class="tree-file">main.go</span> <span class="tree-cmt"># Wire everything together, start HTTP server</span>
+                ├── <span class="tree-dir">internal/</span> <span class="tree-cmt"># Private application code</span>
+                |  ├── <span class="tree-config">config/</span> <span class="tree-cmt"># Configuration loading</span>
+                |  │   ├── <span class="tree-config">config.go</span>
+                |  │   ├── <span class="tree-config">env.go</span>
+                |  │   └── <span class="tree-config">database.go</span>
+                |  ├── <span class="tree-model">models/</span> <span class="tree-cmt"># GORM database models</span>
+                |  │   ├── <span class="tree-model">user.go</span>
+                |  │   ├── <span class="tree-model">role.go</span>
+                |  │   ├── <span class="tree-model">refresh_token.go</span>
+                |  │   └── <span class="tree-model">blacklisted_token.go</span>
+                |  ├── <span class="tree-dir">dto/</span> <span class="tree-cmt"># Data Transfer Objects</span>
+                |  ├── <span class="tree-dir">repository/</span> <span class="tree-cmt"># Data access layer</span>
+                |  ├── <span class="tree-dir">service/</span> <span class="tree-cmt"># Business logic</span>
+                |  ├── <span class="tree-handler">handler/</span> <span class="tree-cmt"># HTTP handlers</span>
+                |  ├── <span class="tree-mw">middleware/</span> <span class="tree-cmt"># Middleware functions</span>
+                |  ├── <span class="tree-dir">routes/</span>
+                |  ├── <span class="tree-util">utils/</span>
+                |  ├── <span class="tree-dir">constants/</span>
+                |  ├── <span class="tree-dir">migrations/</span>
+                |  ├── <span class="tree-dir">tests/</span>
+                ├── <span class="tree-file">.env</span>
+                ├── <span class="tree-file">.env.example</span>
+                ├── <span class="tree-file">go.mod</span>
+                ├── <span class="tree-file">go.sum</span>
+                ├── <span class="tree-file">Makefile</span>
+                └── <span class="tree-file">README.md</span>
+                  </pre>
+      </div>
+
+      <div class="hbox info" style="margin-top:16px">
+        <h4>📁 KEY PRINCIPLE: internal/ Package</h4>
+        <p>Everything inside <strong style="color:var(--text)">internal/</strong> cannot be imported by code outside
+          this module. This is Go's built-in access control for packages — it enforces that our architecture layers can
+          only be used by the application itself, not leaked as a library.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ MODELS & DTOs ═══ -->
+  <section id="models">
+    <div class="container">
+      <div class="s-label">Section 04 · Models & Data Types</div>
+      <div class="s-title">GORM Models, DTOs & Response Structures</div>
+      <p class="s-sub">Models = DB representation. DTOs = API request/response shapes. Never expose models directly —
+        always map through DTOs.</p>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">internal/models/user.go — GORM Model</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-go">
+      package models
+      
+      import (
+      	"time"
+      
+      	"github.com/google/uuid"
+      	"gorm.io/gorm"
+      )
+      
+      type User struct {
+      	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+      	Name         string         `gorm:"type:varchar(100);not null"`
+      	Email        string         `gorm:"type:varchar(255);uniqueIndex;not null"`
+      	PasswordHash string         `gorm:"type:varchar(255);not null"`
+      
+      	RoleID uint `gorm:"not null;default:4"`
+      	Role   Role `gorm:"foreignKey:RoleID;references:ID"`
+      
+      	IsActive    bool `gorm:"default:true"`
+      	LastLoginAt *time.Time
+      
+      	CreatedAt time.Time
+      	UpdatedAt time.Time
+      	DeletedAt gorm.DeletedAt `gorm:"index"`
+      }
+      
+      type Role struct {
+      	ID          uint   `gorm:"primaryKey;autoIncrement"`
+      	Name        string `gorm:"type:varchar(50);uniqueIndex;not null"`
+      	Description string `gorm:"type:varchar(255)"`
+      }
+      
+      type RefreshToken struct {
+      	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+      	UserID    uuid.UUID `gorm:"type:uuid;not null;index"`
+      	TokenHash string    `gorm:"type:varchar(64);uniqueIndex;not null"`
+      
+      	ExpiresAt time.Time `gorm:"not null;index"`
+      	Revoked   bool      `gorm:"default:false"`
+      
+      	CreatedAt time.Time
+      }
+      
+      type BlacklistedToken struct {
+      	ID uint `gorm:"primaryKey;autoIncrement"`
+      
+      	JTI string `gorm:"type:varchar(36);uniqueIndex;not null"`
+      
+      	ExpiresAt time.Time `gorm:"not null;index"`
+      
+      	CreatedAt time.Time
+      }
+      </code></pre>
+      </div>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">internal/dto/auth/ — Request DTOs with validation tags</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-go">
+      // ── Register Request ──────────────────────────────────────────
+      type RegisterRequest struct {
+          Name     string `json:"name" validate:"required,min=2,max=100"`
+          Email    string `json:"email" validate:"required,email"`
+          Password string `json:"password" validate:"required,min=8,max=72"`
+      }
+      
+      // ── Login Request ─────────────────────────────────────────────
+      type LoginRequest struct {
+          Email    string `json:"email" validate:"required,email"`
+          Password string `json:"password" validate:"required"`
+      }
+      
+      // ── User Response (NEVER include password_hash) ───────────────
+      type UserResponse struct {
+          ID          string     `json:"id"`
+          Name        string     `json:"name"`
+          Email       string     `json:"email"`
+          Role        string     `json:"role"`
+          IsActive    bool       `json:"is_active"`
+          LastLoginAt *time.Time `json:"last_login_at,omitempty"`
+          CreatedAt   time.Time  `json:"created_at"`
+      }
+      
+      // ── Update Profile ────────────────────────────────────────────
+      type UpdateProfileRequest struct {
+          Name        *string `json:"name" validate:"omitempty,min=2,max=100"`
+          CurrentPass *string `json:"current_pass" validate:"omitempty"`
+          NewPassword *string `json:"new_password" validate:"omitempty,min=8,max=72"`
+      }
+      
+      // ── JWT Claims ────────────────────────────────────────────────
+      type JWTClaims struct {
+          UserID string `json:"sub"`
+          Email  string `json:"email"`
+          Role   string `json:"role"`
+          JTI    string `json:"jti"` // unique token ID for blacklisting
+      
+          jwt.RegisteredClaims
+      }
+      
+      // ── Paginated Response ────────────────────────────────────────
+      type PaginatedResponse[T any] struct {
+          Data       []T            `json:"data"`
+          Pagination PaginationMeta `json:"pagination"`
+      }
+      
+      type PaginationMeta struct {
+          Page       int   `json:"page"`
+          Limit      int   `json:"limit"`
+          TotalItems int64 `json:"total_items"`
+          TotalPages int   `json:"total_pages"`
+          HasNext    bool  `json:"has_next"`
+          HasPrev    bool  `json:"has_prev"`
+      }
+      
+      // ── Standard API Response ─────────────────────────────────────
+      type APIResponse[T any] struct {
+          Success   bool   `json:"success"`
+          Message   string `json:"message,omitempty"`
+          Data      T      `json:"data,omitempty"`
+          RequestID string `json:"request_id,omitempty"`
+      }
+      
+      // ── Error Response (never expose internal errors) ─────────────
+      type ErrorResponse struct {
+          Success bool              `json:"success"` // always false
+          Message string            `json:"message"`
+          Errors  map[string]string `json:"errors,omitempty"`
+      }
+      </code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ DB SCHEMA ═══ -->
+  <section id="schema">
+    <div class="container">
+      <div class="s-label">Section 05 · Database Design</div>
+      <div class="s-title">PostgreSQL Schema Design</div>
+      <p class="s-sub">Normalized, indexed, efficient. Every field justified. No redundant data. Soft deletes for audit
+        trail.</p>
+
+      <div class="schema-grid">
+
+        <div class="schema-table">
+          <div class="schema-header" style="background:rgba(56,189,248,.08);color:var(--p5)">🏷️ roles</div>
+          <div class="schema-field"><span class="sf-name">id</span>
+            <div><span class="sf-type">UINT</span> <span class="sf-pk">PK</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">name</span>
+            <div><span class="sf-type">VARCHAR(50)</span> <span class="sf-uni">UNIQUE</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">description</span><span class="sf-type">VARCHAR(255)</span>
+          </div>
+          <div style="padding:8px 16px;background:rgba(56,189,248,.05);font-size:11px;color:var(--muted2)">
+            Seeds: admin(1), manager(2), editor(3), user(4)
+          </div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-header" style="background:rgba(0,212,170,.08);color:var(--p1)">👤 users</div>
+          <div class="schema-field"><span class="sf-name">id</span>
+            <div><span class="sf-type">UUID</span> <span class="sf-pk">PK</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">name</span><span class="sf-type">VARCHAR(100)</span></div>
+          <div class="schema-field"><span class="sf-name">email</span>
+            <div><span class="sf-type">VARCHAR(255)</span> <span class="sf-uni">UNIQUE</span> <span
+                class="sf-idx">IDX</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">password_hash</span><span class="sf-type">VARCHAR(255)</span>
+          </div>
+          <div class="schema-field"><span class="sf-name">role_id</span>
+            <div><span class="sf-type">UINT</span> <span class="sf-fk">FK→roles</span> <span class="sf-idx">IDX</span>
+            </div>
+          </div>
+          <div class="schema-field"><span class="sf-name">is_active</span><span class="sf-type">BOOL default:true</span>
+          </div>
+          <div class="schema-field"><span class="sf-name">last_login_at</span><span class="sf-type">TIMESTAMP
+              NULL</span></div>
+          <div class="schema-field"><span class="sf-name">created_at</span><span class="sf-type">TIMESTAMP</span></div>
+          <div class="schema-field"><span class="sf-name">updated_at</span><span class="sf-type">TIMESTAMP</span></div>
+          <div class="schema-field"><span class="sf-name">deleted_at</span>
+            <div><span class="sf-type">TIMESTAMP NULL</span> <span class="sf-idx">IDX</span></div>
+          </div>
+          <div style="padding:8px 16px;background:rgba(0,212,170,.05);font-size:11px;color:var(--muted2)">
+            Soft delete via deleted_at (GORM built-in)
+          </div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-header" style="background:rgba(247,201,72,.08);color:var(--p3)">🔄 refresh_tokens</div>
+          <div class="schema-field"><span class="sf-name">id</span>
+            <div><span class="sf-type">UUID</span> <span class="sf-pk">PK</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">user_id</span>
+            <div><span class="sf-type">UUID</span> <span class="sf-fk">FK→users</span> <span class="sf-idx">IDX</span>
+            </div>
+          </div>
+          <div class="schema-field"><span class="sf-name">token_hash</span>
+            <div><span class="sf-type">CHAR(64)</span> <span class="sf-uni">UNIQUE</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">expires_at</span>
+            <div><span class="sf-type">TIMESTAMP</span> <span class="sf-idx">IDX</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">revoked</span><span class="sf-type">BOOL default:false</span>
+          </div>
+          <div class="schema-field"><span class="sf-name">created_at</span><span class="sf-type">TIMESTAMP</span></div>
+          <div style="padding:8px 16px;background:rgba(247,201,72,.05);font-size:11px;color:var(--muted2)">
+            token_hash = SHA256(rawToken). Never store raw token.
+          </div>
+        </div>
+
+        <div class="schema-table">
+          <div class="schema-header" style="background:rgba(248,113,113,.08);color:var(--con)">🚫 blacklisted_tokens
+          </div>
+          <div class="schema-field"><span class="sf-name">id</span>
+            <div><span class="sf-type">UINT</span> <span class="sf-pk">PK</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">jti</span>
+            <div><span class="sf-type">VARCHAR(36)</span> <span class="sf-uni">UNIQUE</span> <span
+                class="sf-idx">IDX</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">expires_at</span>
+            <div><span class="sf-type">TIMESTAMP</span> <span class="sf-idx">IDX</span></div>
+          </div>
+          <div class="schema-field"><span class="sf-name">created_at</span><span class="sf-type">TIMESTAMP</span></div>
+          <div style="padding:8px 16px;background:rgba(248,113,113,.05);font-size:11px;color:var(--muted2)">
+            Cleanup job: DELETE WHERE expires_at &lt; NOW(). Stays small.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="hbox info" style="margin-top:16px">
+        <h4>🗑️ WHY SOFT DELETE (deleted_at)?</h4>
+        <ul>
+          <li>Audit trail — you can see who was deleted and when</li>
+          <li>Referential integrity — refresh_tokens still reference user even after deletion</li>
+          <li>Recoverable — admin can restore accidentally deleted accounts</li>
+          <li>GORM automatically adds <code>WHERE deleted_at IS NULL</code> to all queries</li>
+        </ul>
+      </div>
+
+      <div class="hbox warn" style="margin-top:12px">
+        <h4>⚠ DATABASE INDEXES — PERFORMANCE CRITICAL</h4>
+        <ul>
+          <li><strong>users.email</strong> — unique index. Every login does <code>WHERE email = ?</code></li>
+          <li><strong>users.role_id</strong> — index. Admin queries users by role frequently</li>
+          <li><strong>refresh_tokens.user_id</strong> — index. Revoke all tokens on password change</li>
+          <li><strong>refresh_tokens.expires_at</strong> — index. Cleanup expired tokens efficiently</li>
+          <li><strong>blacklisted_tokens.jti</strong> — unique index. Every request checks blacklist by JTI</li>
+          <li><strong>blacklisted_tokens.expires_at</strong> — index. Cleanup cron job efficiency</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PERMISSIONS ═══ -->
+  <section id="permissions">
+    <div class="container">
+      <div class="s-label">Section 06 · Role-Based Access Control</div>
+      <div class="s-title">Permission Matrix</div>
+      <p class="s-sub">Four-level role hierarchy. Higher roles inherit all permissions of lower roles. Admin has
+        unrestricted access to everything.</p>
+
+      <!-- Role badges -->
+      <div class="grid-4" style="margin-bottom:20px">
+        <div class="card" style="border-top:3px solid var(--con);text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">👑</div>
+          <h4 style="color:var(--con)">Admin</h4>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">RoleID: 1</div>
+          <p style="margin-top:6px">Full system access. Manage users, roles, any resource.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p3);text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">🔧</div>
+          <h4 style="color:var(--p3)">Manager</h4>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">RoleID: 2</div>
+          <p style="margin-top:6px">View and manage users. Moderate content. Cannot manage roles.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p5);text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">✍️</div>
+          <h4 style="color:var(--p5)">Editor</h4>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">RoleID: 3</div>
+          <p style="margin-top:6px">Create and edit content. Cannot manage users.</p>
+        </div>
+        <div class="card" style="border-top:3px solid var(--p1);text-align:center">
+          <div style="font-size:28px;margin-bottom:6px">👤</div>
+          <h4 style="color:var(--p1)">User</h4>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)">RoleID: 4 (default)</div>
+          <p style="margin-top:6px">Own profile only. Standard user access.</p>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>👤 User</th>
+              <th>✍️ Editor</th>
+              <th>🔧 Manager</th>
+              <th>👑 Admin</th>
+              <th>Middleware Guard</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>View own profile (GET /me)</td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p1)">AuthRequired</code></td>
+            </tr>
+            <tr>
+              <td>Update own profile (PATCH /me)</td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p1)">AuthRequired</code></td>
+            </tr>
+            <tr>
+              <td>Delete own account (DELETE /me)</td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p1)">AuthRequired</code></td>
+            </tr>
+            <tr>
+              <td>View all users (GET /admin/users)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p3)">RequireRole(manager,admin)</code></td>
+            </tr>
+            <tr>
+              <td>View any user (GET /admin/users/:id)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p3)">RequireRole(manager,admin)</code></td>
+            </tr>
+            <tr>
+              <td>Deactivate user (PATCH /users/:id/status)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--p3)">RequireRole(manager,admin)</code></td>
+            </tr>
+            <tr>
+              <td>Assign/change role (PATCH /users/:id/role)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--con)">RequireRole(admin)</code></td>
+            </tr>
+            <tr>
+              <td>Delete any user (DELETE /admin/users/:id)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--con)">RequireRole(admin)</code></td>
+            </tr>
+            <tr>
+              <td>View all roles (GET /admin/roles)</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--con)">RequireRole(admin)</code></td>
+            </tr>
+            <tr>
+              <td>Revoke any user's tokens</td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-no">✗</span></td>
+              <td><span class="perm-yes">✓</span></td>
+              <td><code style="font-size:10px;color:var(--con)">RequireRole(admin)</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">internal/middleware/role_middleware.go</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-go">
+      func RequireRole(roles ...string) func(http.Handler) http.Handler {
+      	return func(next http.Handler) http.Handler {
+      		return http.HandlerFunc(func(
+      			w http.ResponseWriter,
+      			r *http.Request,
+      		) {
+      			claims, ok := r.Context().
+      				Value(constants.UserClaimsKey).
+      				(*dto.JWTClaims)
+      
+      			if !ok || claims == nil {
+      				utils.WriteError(
+      					w,
+      					http.StatusUnauthorized,
+      					"Unauthorized",
+      				)
+      				return
+      			}
+      
+      			for _, role := range roles {
+      				if claims.Role == role {
+      					next.ServeHTTP(w, r)
+      					return
+      				}
+      			}
+      
+      			utils.WriteError(
+      				w,
+      				http.StatusForbidden,
+      				"Insufficient permissions",
+      			)
+      		})
+      	}
+      }
+      </code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ APIs ═══ -->
+  <section id="apis">
+    <div class="container">
+      <div class="s-label">Section 07 · API Design</div>
+      <div class="s-title">REST API Endpoints</div>
+      <p class="s-sub">Version-prefixed, noun-based, consistent response shapes. All responses follow the same
+        APIResponse[T] wrapper.</p>
+
+      <div class="api-group">
+        <div class="api-group-title">🔐 AUTH — /api/v1/auth</div>
+        <div class="endpoint">
+          <span class="method m-post">POST</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/auth/register</div>
+            <div class="ep-desc">Create new user account. Validates email uniqueness, hashes password with bcrypt
+              (cost=12), assigns default "user" role, returns user profile.</div>
+            <div class="ep-badges"><span class="ep-badge eb-public">🌐 Public</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Body: {name,
+              email, password} → Response: 201 + UserResponse</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-post">POST</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/auth/login</div>
+            <div class="ep-desc">Authenticate user. Verify password, generate access token (15min) + refresh token (7d),
+              set both as HttpOnly cookies, store hashed refresh token in DB.</div>
+            <div class="ep-badges"><span class="ep-badge eb-public">🌐 Public</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Body:
+              {email, password} → Sets cookies → Response: 200 + UserResponse (no tokens in body)</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-post">POST</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/auth/refresh</div>
+            <div class="ep-desc">Get new access token using refresh token from cookie. Validates token hash in DB,
+              checks not revoked, generates new access token. Optionally rotates refresh token.</div>
+            <div class="ep-badges"><span class="ep-badge eb-public">🌐 Public (refresh cookie required)</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Reads
+              refresh_token cookie → Sets new access_token cookie → Response: 200</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-post">POST</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/auth/logout</div>
+            <div class="ep-desc">Invalidate session. Extract JTI from access token, insert into blacklist table with
+              expiry, revoke refresh token in DB, clear both cookies.</div>
+            <div class="ep-badges"><span class="ep-badge eb-auth">🔐 Auth Required</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Extracts JTI
+              → Blacklists → Revokes refresh → Clears cookies → 204 No Content</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">👤 PROFILE — /api/v1/users</div>
+        <div class="endpoint">
+          <span class="method m-get">GET</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/users/me</div>
+            <div class="ep-desc">Get authenticated user's profile. Reads claims from JWT in cookie context. Returns full
+              UserResponse.</div>
+            <div class="ep-badges"><span class="ep-badge eb-auth">🔐 Auth Required</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Response:
+              200 + UserResponse</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-patch">PATCH</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/users/me</div>
+            <div class="ep-desc">Update own profile. Change name, update password (requires current password
+              verification). Partial updates via pointer fields.</div>
+            <div class="ep-badges"><span class="ep-badge eb-auth">🔐 Auth Required</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Body:
+              {name?, current_pass?, new_password?} → Response: 200 + UserResponse</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-delete">DELETE</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/users/me</div>
+            <div class="ep-desc">Soft-delete own account. Sets deleted_at, revokes all refresh tokens, blacklists
+              current access token, clears cookies.</div>
+            <div class="ep-badges"><span class="ep-badge eb-auth">🔐 Auth Required</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Response:
+              204 No Content</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="api-group">
+        <div class="api-group-title">👑 ADMIN — /api/v1/admin</div>
+        <div class="endpoint">
+          <span class="method m-get">GET</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/users</div>
+            <div class="ep-desc">List all users with pagination, search, and filters. Supports: page, limit, search
+              (name/email ILIKE), role filter, is_active filter, sort_by, order.</div>
+            <div class="ep-badges"><span class="ep-badge eb-manager">🔧 Manager+</span><span
+                class="ep-badge eb-admin">👑 Admin</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">
+              ?page=1&limit=20&search=john&role=editor&is_active=true&sort=created_at&order=desc</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-get">GET</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/users/{id}</div>
+            <div class="ep-desc">Get specific user by UUID. Returns full UserResponse including role details.</div>
+            <div class="ep-badges"><span class="ep-badge eb-manager">🔧 Manager+</span><span
+                class="ep-badge eb-admin">👑 Admin</span></div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-patch">PATCH</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/users/{id}/role</div>
+            <div class="ep-desc">Assign a role to a user. Admin only. Cannot assign a higher role than your own.
+              Validates role exists.</div>
+            <div class="ep-badges"><span class="ep-badge eb-admin">👑 Admin Only</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Body:
+              {role_id: 3} → Response: 200 + UserResponse</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-patch">PATCH</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/users/{id}/status</div>
+            <div class="ep-desc">Activate or deactivate a user account. Deactivated users cannot login. Does not delete
+              data.</div>
+            <div class="ep-badges"><span class="ep-badge eb-manager">🔧 Manager+</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Body:
+              {is_active: false} → Response: 200 + UserResponse</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-delete">DELETE</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/users/{id}</div>
+            <div class="ep-desc">Soft-delete any user. Admin only. Also revokes all their refresh tokens (force logout
+              all devices).</div>
+            <div class="ep-badges"><span class="ep-badge eb-admin">👑 Admin Only</span></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px">Response:
+              204 No Content</div>
+          </div>
+        </div>
+        <div class="endpoint">
+          <span class="method m-get">GET</span>
+          <div class="ep-body">
+            <div class="ep-path">/api/v1/admin/roles</div>
+            <div class="ep-desc">List all available roles. Admin only.</div>
+            <div class="ep-badges"><span class="ep-badge eb-admin">👑 Admin Only</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Query params for list -->
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">Pagination + Search + Filter — Query Parameters</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-go">
+      type UserQueryParams struct {
+      	Page     int    `schema:"page" validate:"min=1"`
+      	Limit    int    `schema:"limit" validate:"min=1,max=100"`
+      	Search   string `schema:"search"`
+      	Role     string `schema:"role"`
+      	IsActive *bool  `schema:"is_active"`
+      	SortBy   string `schema:"sort_by"`
+      	Order    string `schema:"order"`
+      }
+      
+      func (r *UserRepository) ListUsers(
+      	ctx context.Context,
+      	params UserQueryParams,
+      ) ([]models.User, int64, error) {
+      
+      	var users []models.User
+      	var total int64
+      
+      	query := r.db.
+      		WithContext(ctx).
+      		Preload("Role")
+      
+      	if params.Search != "" {
+      		searchPattern := "%" + params.Search + "%"
+      
+      		query = query.Where(
+      			"name ILIKE ? OR email ILIKE ?",
+      			searchPattern,
+      			searchPattern,
+      		)
+      	}
+      
+      	if params.Role != "" {
+      		query = query.
+      			Joins("JOIN roles ON roles.id = users.role_id").
+      			Where("roles.name = ?", params.Role)
+      	}
+      
+      	if params.IsActive != nil {
+      		query = query.Where(
+      			"is_active = ?",
+      			*params.IsActive,
+      		)
+      	}
+      
+      	query.Model(&models.User{}).Count(&total)
+      
+      	offset := (params.Page - 1) * params.Limit
+      	orderClause := params.SortBy + " " + params.Order
+      
+      	err := query.
+      		Order(orderClause).
+      		Limit(params.Limit).
+      		Offset(offset).
+      		Find(&users).
+      		Error
+      
+      	return users, total, err
+      }
+      </code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ JWT & COOKIES ═══ -->
+  <section id="jwt">
+    <div class="container">
+      <div class="s-label">Section 08 · JWT + Cookie Strategy</div>
+      <div class="s-title">Token Flow & Cookie Security</div>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" style="font-family:'Space Mono',monospace">
+          <defs>
+            <marker id="aj" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0,7 2.5,0 5" fill="#00d4aa" />
+            </marker>
+            <marker id="ar" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+              <polygon points="0 0,7 2.5,0 5" fill="#f472b6" />
+            </marker>
+          </defs>
+          <!-- Login flow -->
+          <text x="350" y="18" text-anchor="middle" fill="#00d4aa" font-size="11" font-weight="bold">LOGIN FLOW → COOKIE
+            SET BY BACKEND</text>
+
+          <rect x="10" y="28" width="90" height="40" rx="6" fill="rgba(0,212,170,.1)" stroke="rgba(0,212,170,.4)"
+            stroke-width="1.5" />
+          <text x="55" y="45" text-anchor="middle" fill="#00d4aa" font-size="9" font-weight="bold">Client</text>
+          <text x="55" y="60" text-anchor="middle" fill="#8892a4" font-size="8">POST /login</text>
+
+          <line x1="100" y1="48" x2="165" y2="48" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aj)" />
+          <text x="132" y="42" text-anchor="middle" fill="#6272a4" font-size="8">{email,pass}</text>
+
+          <rect x="165" y="28" width="100" height="40" rx="6" fill="rgba(0,212,170,.15)" stroke="#00d4aa"
+            stroke-width="2" />
+          <text x="215" y="45" text-anchor="middle" fill="#00d4aa" font-size="9" font-weight="bold">Auth Service</text>
+          <text x="215" y="60" text-anchor="middle" fill="#8892a4" font-size="8">verify + generate</text>
+
+          <line x1="265" y1="48" x2="330" y2="48" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aj)" />
+          <text x="297" y="42" text-anchor="middle" fill="#6272a4" font-size="8">hash(token)</text>
+
+          <rect x="330" y="28" width="100" height="40" rx="6" fill="rgba(51,103,145,.12)" stroke="#336791"
+            stroke-width="1.5" />
+          <text x="380" y="45" text-anchor="middle" fill="#38bdf8" font-size="9" font-weight="bold">PostgreSQL</text>
+          <text x="380" y="60" text-anchor="middle" fill="#8892a4" font-size="8">store token_hash</text>
+
+          <!-- Response with cookies -->
+          <line x1="165" y1="68" x2="100" y2="68" stroke="#f472b6" stroke-width="1.5" marker-end="url(#ar)" />
+          <text x="132" y="80" text-anchor="middle" fill="#f472b6" font-size="8">Set-Cookie: access_token</text>
+          <text x="132" y="90" text-anchor="middle" fill="#f472b6" font-size="8">Set-Cookie: refresh_token</text>
+
+          <!-- Cookie properties -->
+          <rect x="430" y="28" width="260" height="80" rx="8" fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)"
+            stroke-width="1.5" />
+          <text x="560" y="46" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold">Cookie
+            Properties</text>
+          <text x="450" y="62" fill="#8892a4" font-size="8">HttpOnly = JS cannot access (XSS protection)</text>
+          <text x="450" y="75" fill="#8892a4" font-size="8">Secure = HTTPS only (MitM protection)</text>
+          <text x="450" y="88" fill="#8892a4" font-size="8">SameSite=Strict = no CSRF risk</text>
+          <text x="450" y="101" fill="#8892a4" font-size="8">access: Max-Age=900s | refresh: Max-Age=604800s</text>
+
+          <!-- Separator -->
+          <line x1="10" y1="120" x2="690" y2="120" stroke="rgba(255,255,255,.05)" stroke-width="1" />
+          <text x="350" y="135" text-anchor="middle" fill="#f7c948" font-size="11" font-weight="bold">SUBSEQUENT REQUEST
+            FLOW</text>
+
+          <rect x="10" y="145" width="90" height="32" rx="6" fill="rgba(0,212,170,.1)" stroke="rgba(0,212,170,.4)"
+            stroke-width="1.5" />
+          <text x="55" y="165" text-anchor="middle" fill="#00d4aa" font-size="9">GET /users/me</text>
+
+          <line x1="100" y1="161" x2="148" y2="161" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aj)" />
+          <text x="124" y="154" text-anchor="middle" fill="#6272a4" font-size="8">cookie sent auto</text>
+
+          <rect x="148" y="145" width="100" height="32" rx="6" fill="rgba(244,114,182,.1)"
+            stroke="rgba(244,114,182,.35)" stroke-width="1.5" />
+          <text x="198" y="160" text-anchor="middle" fill="#f472b6" font-size="9" font-weight="bold">Auth
+            Middleware</text>
+          <text x="198" y="172" text-anchor="middle" fill="#8892a4" font-size="8">extract+verify JWT</text>
+
+          <line x1="248" y1="161" x2="298" y2="161" stroke="#f472b6" stroke-width="1.5" marker-end="url(#aj)" />
+          <text x="273" y="154" text-anchor="middle" fill="#6272a4" font-size="8">check blacklist</text>
+
+          <rect x="298" y="145" width="100" height="32" rx="6" fill="rgba(248,113,113,.08)"
+            stroke="rgba(248,113,113,.3)" stroke-width="1.5" />
+          <text x="348" y="162" text-anchor="middle" fill="#f87171" font-size="9" font-weight="bold">Blacklist
+            Check</text>
+          <text x="348" y="174" text-anchor="middle" fill="#8892a4" font-size="8">SELECT jti → none</text>
+
+          <line x1="398" y1="161" x2="448" y2="161" stroke="#00d4aa" stroke-width="1.5" marker-end="url(#aj)" />
+          <text x="423" y="154" text-anchor="middle" fill="#6272a4" font-size="8">attach claims</text>
+
+          <rect x="448" y="145" width="100" height="32" rx="6" fill="rgba(163,230,53,.08)" stroke="rgba(163,230,53,.3)"
+            stroke-width="1.5" />
+          <text x="498" y="165" text-anchor="middle" fill="#a3e635" font-size="9" font-weight="bold">Handler</text>
+
+          <!-- Logout flow -->
+          <line x1="10" y1="200" x2="690" y2="200" stroke="rgba(255,255,255,.05)" stroke-width="1" />
+          <text x="350" y="215" text-anchor="middle" fill="#f87171" font-size="11" font-weight="bold">LOGOUT FLOW —
+            TOKEN INVALIDATION</text>
+          <text x="100" y="235" text-anchor="middle" fill="#8892a4" font-size="8">1. Extract JTI from access
+            token</text>
+          <text x="280" y="235" text-anchor="middle" fill="#8892a4" font-size="8">2. INSERT jti + exp → blacklist</text>
+          <text x="450" y="235" text-anchor="middle" fill="#8892a4" font-size="8">3. UPDATE refresh →
+            revoked=true</text>
+          <text x="620" y="235" text-anchor="middle" fill="#8892a4" font-size="8">4. Clear cookies</text>
+          <text x="100" y="248" text-anchor="middle" fill="#f87171" font-size="8">from cookie/ctx</text>
+          <text x="280" y="248" text-anchor="middle" fill="#f87171" font-size="8">DB write</text>
+          <text x="450" y="248" text-anchor="middle" fill="#f87171" font-size="8">DB write</text>
+          <text x="620" y="248" text-anchor="middle" fill="#f87171" font-size="8">http.SetCookie(w, expired)</text>
+        </svg>
+      </div>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">internal/utils/cookie.go + jwt.go</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-go">
+      func SetAuthCookies(
+      	w http.ResponseWriter,
+      	accessToken string,
+      	refreshToken string,
+      ) {
+      	http.SetCookie(w, &http.Cookie{
+      		Name:     "access_token",
+      		Value:    accessToken,
+      		HttpOnly: true,
+      		Secure:   true,
+      		Path:     "/",
+      		MaxAge:   900,
+      	})
+      
+      	http.SetCookie(w, &http.Cookie{
+      		Name:     "refresh_token",
+      		Value:    refreshToken,
+      		HttpOnly: true,
+      		Secure:   true,
+      		Path:     "/api/v1/auth/refresh",
+      		MaxAge:   604800,
+      	})
+      }
+      </code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ DEPENDENCIES ═══ -->
+  <section id="deps">
+    <div class="container">
+      <div class="s-label">Section 09 · Dependencies</div>
+      <div class="s-title">Install Commands & Dependency Guide</div>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">Terminal — Initialize and install all dependencies</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-bash">
+      go mod init go-auth-platform
+      
+      go get github.com/gorilla/mux
+      go get gorm.io/gorm
+      go get gorm.io/driver/postgres
+      go get github.com/golang-jwt/jwt/v5
+      go get golang.org/x/crypto
+      go get github.com/joho/godotenv
+      go get github.com/go-playground/validator/v10
+      go get github.com/google/uuid
+      go get go.uber.org/zap
+      go get github.com/gorilla/schema
+      
+      go mod tidy
+      </code></pre>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px">
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p1)"></span>Why gorilla/mux?</h4>
+          <p>Supports URL variables <code>{id}</code>, middleware chaining, subrouters for versioning. More control than
+            net/http default mux. Industry-standard for Go REST APIs.</p>
+        </div>
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p3)"></span>Why GORM?</h4>
+          <p>Auto-migration, preloading relations, soft delete, hooks, transactions, scopes. Write zero SQL. Focus on
+            business logic. Repository pattern wraps GORM cleanly.</p>
+        </div>
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p4)"></span>Why bcrypt cost=12?</h4>
+          <p>Cost 10 ≈ 65ms, Cost 12 ≈ 250ms. Higher cost = slower brute force. 250ms is acceptable for login. Never use
+            cost &lt;10. This is why login is 50-120ms.</p>
+        </div>
+      </div>
+
+      <div class="code-bar">
+        <div class="dr"></div>
+        <div class="dy"></div>
+        <div class="dg"></div><span class="cb-l">.env.example — Environment variables template</span>
+      </div>
+      <div class="code-block">
+        <pre><code class="language-bash">
+      APP_PORT=8080
+      APP_ENV=development
+      APP_NAME=go-auth-platform
+      
+      DB_HOST=localhost
+      DB_PORT=5432
+      DB_NAME=go_auth_platform
+      DB_USER=postgres
+      DB_PASSWORD=your_password
+      
+      JWT_SECRET=your-256-bit-secret-key
+      JWT_ACCESS_TTL=15m
+      JWT_REFRESH_TTL=168h
+      
+      COOKIE_SECURE=false
+      COOKIE_DOMAIN=localhost
+      
+      LOG_LEVEL=debug
+      </code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ ROADMAP ═══ -->
+  <section id="roadmap">
+    <div class="container">
+      <div class="s-label">Section 10 · Build Roadmap</div>
+      <div class="s-title">11-Part Build Timeline ≈ 17 Working Days</div>
+      <p class="s-sub">Each part is a self-contained deliverable. Commit after each part. Never work on Part 3 without
+        Part 2 complete.</p>
+
+      <div class="timeline">
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p1)">01</span>
+            <span class="tl-time-badge" style="background:var(--p1d);color:var(--p1)">1.5 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p1)">
+            <h4>Project Setup & Configuration</h4>
+            <div class="tl-sub">Foundation — get this 100% right before writing any business logic</div>
+            <p class="tl-goal">Initialize module. Create full folder structure. Set up config loading from .env.
+              Initialize PostgreSQL connection with GORM. Set up zap logger. Wire main.go with basic HTTP server that
+              starts and shows "Server running on :8080".</p>
+            <div class="tl-items">
+              <span class="tl-item">go.mod init</span><span class="tl-item">folder structure</span><span
+                class="tl-item">config.go</span><span class="tl-item">database.go</span><span class="tl-item">zap
+                logger</span><span class="tl-item">main.go wiring</span><span class="tl-item">health check
+                endpoint</span>
+            </div>
+            <div class="hbox info" style="margin-top:10px;padding:8px 12px">
+              <p>✅ <strong style="color:var(--text)">Deliverable:</strong> <code>go run ./cmd/server</code> starts
+                server, connects to PostgreSQL, responds to GET /health → 200</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p5)">02</span>
+            <span class="tl-time-badge" style="background:var(--p5d);color:var(--p5)">1 day</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p5)">
+            <h4>Database Models & Migrations</h4>
+            <div class="tl-sub">Define all 4 GORM models — get schema right before writing code</div>
+            <p class="tl-goal">Write User, Role, RefreshToken, BlacklistedToken models with all GORM tags. Write
+              AutoMigrate setup. Seed roles table (admin, manager, editor, user). Verify tables created correctly in
+              PostgreSQL with \d command.</p>
+            <div class="tl-items">
+              <span class="tl-item">User model</span><span class="tl-item">Role model</span><span
+                class="tl-item">RefreshToken model</span><span class="tl-item">BlacklistedToken model</span><span
+                class="tl-item">AutoMigrate</span><span class="tl-item">seed roles</span>
+            </div>
+            <div class="hbox info" style="margin-top:10px;padding:8px 12px">
+              <p>✅ <strong style="color:var(--text)">Deliverable:</strong> All 4 tables exist in PostgreSQL with correct
+                columns, indexes, and foreign keys.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p2)">03</span>
+            <span class="tl-time-badge" style="background:var(--p2d);color:var(--p2)">1 day</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p2)">
+            <h4>Repository Layer</h4>
+            <div class="tl-sub">Write all DB access — service layer calls these only</div>
+            <p class="tl-goal">Define repository interfaces in interfaces.go. Implement UserRepository (FindByEmail,
+              FindByID, Create, Update, Delete, List). Implement RoleRepository (FindByName, FindAll). Implement
+              RefreshTokenRepository (Create, FindByHash, RevokeByUserID). Implement BlacklistRepository (Create,
+              ExistsByJTI, DeleteExpired).</p>
+            <div class="tl-items">
+              <span class="tl-item">interfaces.go</span><span class="tl-item">user_repository.go</span><span
+                class="tl-item">role_repository.go</span><span class="tl-item">refresh_repository.go</span><span
+                class="tl-item">blacklist_repository.go</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p4)">04</span>
+            <span class="tl-time-badge" style="background:var(--p4d);color:var(--p4)">2 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p4)">
+            <h4>Authentication Service + DTOs</h4>
+            <div class="tl-sub">Core auth logic — the most important part</div>
+            <p class="tl-goal">Write all DTOs (RegisterRequest, LoginRequest, UserResponse). Write password.go utility
+              (HashPassword, ComparePassword with bcrypt). Write jwt.go utility (GenerateAccessToken,
+              GenerateRefreshToken, ParseToken, HashToken). Write cookie.go utility (SetAuthCookies, ClearAuthCookies).
+              Write auth_service.go (Register, Login, Logout, RefreshToken methods).</p>
+            <div class="tl-items">
+              <span class="tl-item">DTOs</span><span class="tl-item">password.go</span><span
+                class="tl-item">jwt.go</span><span class="tl-item">cookie.go</span><span
+                class="tl-item">auth_service.go</span><span class="tl-item">validator.go</span>
+            </div>
+            <div class="hbox warn" style="margin-top:10px;padding:8px 12px">
+              <p>⚠️ Write thorough unit tests for auth_service before moving to handlers. Use mock repositories.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p3)">05</span>
+            <span class="tl-time-badge" style="background:var(--p3d);color:var(--p3)">1.5 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p3)">
+            <h4>Auth Handler + Routes + Middleware (Auth)</h4>
+            <div class="tl-sub">First working HTTP endpoints — Register, Login, Logout, Refresh</div>
+            <p class="tl-goal">Write auth_handler.go (HandleRegister, HandleLogin, HandleLogout, HandleRefresh). Write
+              auth_middleware.go — extract JWT from cookie, verify signature, check blacklist, attach claims to context.
+              Write recovery_middleware.go and logging_middleware.go. Register routes in routes.go. Test all auth
+              endpoints with curl or Postman.</p>
+            <div class="tl-items">
+              <span class="tl-item">auth_handler.go</span><span class="tl-item">auth_middleware.go</span><span
+                class="tl-item">recovery_middleware.go</span><span class="tl-item">logging_middleware.go</span><span
+                class="tl-item">routes.go</span>
+            </div>
+            <div class="hbox info" style="margin-top:10px;padding:8px 12px">
+              <p>✅ <strong style="color:var(--text)">Deliverable:</strong> Register → Login → Cookie set → Verify
+                /users/me → Logout → Blacklisted.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p6)">06</span>
+            <span class="tl-time-badge" style="background:var(--p6d);color:var(--p6)">1.5 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p6)">
+            <h4>RBAC — Role Middleware + User Service + Handler</h4>
+            <div class="tl-sub">Role-based access control with RequireRole middleware</div>
+            <p class="tl-goal">Write role_middleware.go (RequireRole higher-order function). Write user_service.go
+              (GetProfile, UpdateProfile, DeleteAccount). Write user_handler.go (GetMe, UpdateMe, DeleteMe). Add
+              /admin/* routes with RequireRole. Test that /admin/users returns 403 for non-admin users.</p>
+            <div class="tl-items">
+              <span class="tl-item">role_middleware.go</span><span class="tl-item">user_service.go</span><span
+                class="tl-item">user_handler.go</span><span class="tl-item">constants/roles.go</span><span
+                class="tl-item">RBAC route guards</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p7)">07</span>
+            <span class="tl-time-badge" style="background:var(--p7d);color:var(--p7)">2 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p7)">
+            <h4>Admin Service + Handler + Pagination + Search + Filters</h4>
+            <div class="tl-sub">Full admin CRUD + production-quality list endpoint</div>
+            <p class="tl-goal">Write admin handler (ListUsers, GetUser, UpdateUserRole, UpdateUserStatus, DeleteUser).
+              Write pagination.go utility. Write UserQueryParams with gorilla/schema decoding. Implement GORM query
+              builder with search (ILIKE), role filter, is_active filter, sort, and offset pagination. Response includes
+              PaginationMeta.</p>
+            <div class="tl-items">
+              <span class="tl-item">admin_handler.go</span><span class="tl-item">pagination.go</span><span
+                class="tl-item">query_params.go</span><span class="tl-item">ListUsers + filters</span><span
+                class="tl-item">PaginatedResponse</span>
+            </div>
+            <div class="hbox info" style="margin-top:10px;padding:8px 12px">
+              <p>✅ <strong style="color:var(--text)">Deliverable:</strong> GET
+                /admin/users?search=john&role=editor&page=2&limit=10 returns paginated, filtered, sorted user list.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--con)">08</span>
+            <span class="tl-time-badge" style="background:rgba(248,113,113,.12);color:var(--con)">1.5 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--con)">
+            <h4>Centralized Error Handling + Response Helpers</h4>
+            <div class="tl-sub">Never let internals leak — clean error surface for all clients</div>
+            <p class="tl-goal">Write sentinel errors in constants/errors.go (ErrNotFound, ErrUnauthorized,
+              ErrInvalidCredentials, ErrEmailTaken, ErrInactiveAccount). Write response.go utility (WriteJSON,
+              WriteError, WriteSuccess). Update all handlers to use WriteError — never return raw DB/Go errors to
+              clients. Ensure all 40x/50x responses follow ErrorResponse schema.</p>
+            <div class="tl-items">
+              <span class="tl-item">constants/errors.go</span><span class="tl-item">utils/response.go</span><span
+                class="tl-item">error mapping in services</span><span class="tl-item">recovery middleware</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p5)">09</span>
+            <span class="tl-time-badge" style="background:var(--p5d);color:var(--p5)">1 day</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p5)">
+            <h4>Blacklist Cleanup + CORS + RequestID Middleware</h4>
+            <div class="tl-sub">Production polish — automatic token cleanup, CORS, traceability</div>
+            <p class="tl-goal">Write background goroutine that runs DELETE FROM blacklisted_tokens WHERE expires_at &lt;
+              NOW() every 30 minutes. Write cors_middleware.go. Write request_id_middleware.go (generates UUID, attaches
+              to context + response headers). Update logging to include request_id for distributed tracing.</p>
+            <div class="tl-items">
+              <span class="tl-item">blacklist cleanup goroutine</span><span
+                class="tl-item">cors_middleware.go</span><span class="tl-item">request_id_middleware.go</span><span
+                class="tl-item">zap request logging</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p2)">10</span>
+            <span class="tl-time-badge" style="background:var(--p2d);color:var(--p2)">2 days</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p2)">
+            <h4>Testing (Unit + Integration)</h4>
+            <div class="tl-sub">Prove the system works correctly — catch edge cases before production</div>
+            <p class="tl-goal">Write unit tests for: auth_service.go (register happy path, duplicate email, wrong
+              password, inactive user, expired token). Write repository mock using interfaces. Write integration tests
+              that spin up test PostgreSQL (via docker-compose or testcontainers), run real DB queries, test full auth
+              flow end-to-end. Target 70%+ coverage on service layer.</p>
+            <div class="tl-items">
+              <span class="tl-item">mock repositories</span><span class="tl-item">auth_service_test.go</span><span
+                class="tl-item">user_service_test.go</span><span class="tl-item">integration test</span><span
+                class="tl-item">go test -race</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-part">
+          <div class="tl-left">
+            <span class="tl-part-num" style="color:var(--p1)">11</span>
+            <span class="tl-time-badge" style="background:var(--p1d);color:var(--p1)">1 day</span>
+          </div>
+          <div class="tl-right" style="--ac:var(--p1)">
+            <h4>Final Polish, Documentation & README</h4>
+            <div class="tl-sub">Production-ready finish — Makefile, README, .env.example</div>
+            <p class="tl-goal">Write Makefile (make run, make test, make migrate, make build). Write README with setup
+              instructions, API docs table, architecture diagram. Add graceful shutdown to main.go (os.Signal,
+              server.Shutdown with 30s timeout). Verify all .env values validated at startup. Write .env.example. Push
+              to GitHub.</p>
+            <div class="tl-items">
+              <span class="tl-item">Makefile</span><span class="tl-item">README.md</span><span class="tl-item">graceful
+                shutdown</span><span class="tl-item">config validation</span><span class="tl-item">.env.example</span>
+            </div>
+            <div class="hbox info" style="margin-top:10px;padding:8px 12px">
+              <p>✅ <strong style="color:var(--text)">Final Deliverable:</strong> Complete IAM system —
+                <code>git clone</code> → <code>cp .env.example .env</code> → <code>make run</code> → working system.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ WHAT YOU LEARN ═══ -->
+  <section id="learn">
+    <div class="container">
+      <div class="s-label">Section 11 · Knowledge Gained</div>
+      <div class="s-title">What You Learn & Achieve</div>
+      <p class="s-sub">After completing this project, you will have built a system that is fundamentally the same
+        architecture as what companies like Auth0, Okta, and Keycloak are built on.</p>
+
+      <div class="learn-grid">
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Clean Architecture</strong>Handler → Service → Repository → DB. Strict layer
+            dependency rules.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Repository Pattern</strong>DB calls isolated behind interfaces. Swap PostgreSQL
+            for mock in tests.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>GORM ORM</strong>Model definition, AutoMigrate, preloading, soft delete,
+            transactions, query builder.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>JWT Authentication</strong>Access + Refresh tokens. Claims structure. Signing.
+            Verification. JTI concept.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>HttpOnly Cookie Security</strong>Why cookies beat localStorage. XSS protection.
+            SameSite CSRF defense. Scoped paths.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>RBAC (Role-Based Access Control)</strong>Role hierarchy. RequireRole middleware.
+            Permission matrix enforcement.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Token Blacklisting</strong>JTI-based revocation. Industry approach — store ID not
+            full token. Cleanup strategy.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Refresh Token Rotation</strong>Token hash storage. Revocation on logout.
+            Automatic re-issue via refresh endpoint.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>bcrypt Password Hashing</strong>Why bcrypt. Cost factor tradeoffs.
+            CompareHashAndPassword timing-safe comparison.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Middleware Design</strong>Higher-order functions. Chain ordering matters. Context
+            value passing between middlewares.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Pagination</strong>Offset pagination with metadata. PaginationMeta in response.
+            Default + max limits.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Search & Filtering</strong>ILIKE for case-insensitive search. Multi-field
+            filters. Dynamic GORM query building.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Dependency Injection</strong>Constructor injection. No global state. Interfaces
+            for testability.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Centralized Error Handling</strong>Sentinel errors. Never expose internals.
+            Consistent error response schema.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Structured Logging (zap)</strong>Request logging with latency. Error logging with
+            stack traces. Log levels.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>DTO Pattern</strong>Separate request/response from DB models. Validation tags.
+            Never expose password_hash.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Soft Delete</strong>deleted_at audit trail. GORM automatic filtering. User
+            recovery possible.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Unit Testing</strong>Mock repositories. Test service layer in isolation.
+            Table-driven tests.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>API Versioning</strong>/api/v1/ prefix. Why versioning matters. How to add
+            /api/v2 without breaking v1.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Graceful Shutdown</strong>os.Signal handling. server.Shutdown with timeout.
+            In-flight request completion.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Database Index Strategy</strong>Which columns to index. Why indexes matter.
+            B-tree vs hash. Composite indexes.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Background Jobs in Go</strong>Goroutine for periodic cleanup. Ticker pattern.
+            Shutdown via context.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Production Folder Structure</strong>internal/ package. cmd/ entrypoints.
+            Separation of concerns at directory level.</div>
+        </div>
+        <div class="learn-item"><span class="li-check">✅</span>
+          <div class="li-text"><strong>Go Generics in APIs</strong>APIResponse[T] and PaginatedResponse[T] — type-safe
+            response wrappers without code duplication.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ PERFORMANCE ═══ -->
+  <section id="perf">
+    <div class="container">
+      <div class="s-label">Section 12 · System Performance</div>
+      <div class="s-title">What Your System Can Handle</div>
+      <p class="s-sub">On a standard 2 vCPU / 4GB RAM server. No caching, no rate limiting — pure application
+        performance.</p>
+
+      <div class="perf-grid">
+        <div class="perf-card">
+          <span class="perf-val">500–1500</span>
+          <span class="perf-label">Requests/sec</span>
+          <span class="perf-note">Mixed workload average. JWT verification is the bottleneck for throughput, not
+            DB.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">&lt;5ms</span>
+          <span class="perf-label">JWT Verify (p99)</span>
+          <span class="perf-note">HS256 + blacklist DB lookup. Dominates auth middleware latency.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">50–120ms</span>
+          <span class="perf-label">Login latency</span>
+          <span class="perf-note">bcrypt cost=12 is intentionally slow (~250ms hashing). This is the floor.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">10–30ms</span>
+          <span class="perf-label">GET /users/me</span>
+          <span class="perf-note">JWT check + 1 DB read (user + role preload). Dominated by DB round-trip.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">20–60ms</span>
+          <span class="perf-label">Paginated list</span>
+          <span class="perf-note">2 queries: COUNT(*) + SELECT with LIMIT/OFFSET. Add index on filter columns.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">&lt;1ms</span>
+          <span class="perf-label">Blacklist lookup</span>
+          <span class="perf-note">SELECT WHERE jti = ? with unique index. Near-instant with proper indexing.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">50–200MB</span>
+          <span class="perf-label">Memory usage</span>
+          <span class="perf-note">Go binary (~15MB) + GORM + goroutines. Very light. Can run on 512MB RAM.</span>
+        </div>
+        <div class="perf-card">
+          <span class="perf-val">10,000+</span>
+          <span class="perf-label">Concurrent users</span>
+          <span class="perf-note">DB connection pool (25 max) is real limit. Use PgBouncer for higher
+            concurrency.</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:20px">
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p1)"></span>Bottleneck Analysis</h4>
+          <ul>
+            <li><strong>Login:</strong> bcrypt is intentionally slow — this is security, not a bug</li>
+            <li><strong>Blacklist check:</strong> 1 DB query per authenticated request — add unique index on jti</li>
+            <li><strong>List users:</strong> ILIKE is case-insensitive but slower — use pg_trgm index for full-text</li>
+            <li><strong>Connection pool:</strong> 25 connections handles ~250 concurrent DB queries</li>
+            <li><strong>High load:</strong> Go goroutines handle 10K concurrent HTTP connections with ~4KB each</li>
+          </ul>
+        </div>
+        <div class="info-block">
+          <h4><span class="dot" style="background:var(--p3)"></span>Scaling This System (When Ready)</h4>
+          <ul>
+            <li><strong>Read scaling:</strong> Add PostgreSQL read replica — route GET queries there</li>
+            <li><strong>Blacklist at scale:</strong> Move to Redis for sub-ms lookup without DB hit</li>
+            <li><strong>Multiple instances:</strong> Stateless JWT — run N instances behind a load balancer</li>
+            <li><strong>Microservice split:</strong> auth-service and user-service are already logically separated in
+              code</li>
+            <li><strong>Horizontal:</strong> Go binary is stateless — deploy on Kubernetes, scale pods independently
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Final system capabilities -->
+      <div class="verdict">
+        <h3>🎯 What Your go-auth-platform Can Do</h3>
+        <div class="verdict-grid">
+          <div class="vi">
+            <strong style="color:var(--p1)">Complete Auth System</strong>
+            <span>Register, Login, Logout, Token Refresh — all with HttpOnly cookie transport. JS cannot steal
+              tokens.</span>
+          </div>
+          <div class="vi">
+            <strong style="color:var(--p2)">4-Level RBAC</strong>
+            <span>Admin → Manager → Editor → User. Per-route role guards. RequireRole middleware composable on any
+              route.</span>
+          </div>
+          <div class="vi">
+            <strong style="color:var(--p3)">Token Revocation</strong>
+            <span>Logout immediately invalidates tokens via JTI blacklist. Force-logout any user. All devices logged out
+              on account deletion.</span>
+          </div>
+          <div class="vi">
+            <strong style="color:var(--p4)">Production Search</strong>
+            <span>Search users by name/email. Filter by role and active status. Paginated with metadata. Sorted by any
+              column.</span>
+          </div>
+          <div class="vi">
+            <strong style="color:var(--p6)">Resilient Design</strong>
+            <span>Recovery middleware catches all panics. Graceful shutdown. Structured logging. Never crashes on user
+              input errors.</span>
+          </div>
+          <div class="vi">
+            <strong style="color:var(--pro)">Scale Ready</strong>
+            <span>Stateless JWT — deploy multiple instances. Interface-driven — add caching later. Split into
+              microservices with interfaces already defined.</span>
+          </div>
+        </div>
+
+        <div
+          style="margin-top:20px;padding:18px 22px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);border-radius:10px;">
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--p1);margin-bottom:10px;">
+            💡 After Completing This — What's Next?</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;">
+            <div style="font-size:12.5px;color:var(--muted)">→ Add email verification (SendGrid / SES + one-time token)
+            </div>
+            <div style="font-size:12.5px;color:var(--muted)">→ Add OAuth2 (Google, GitHub login via golang.org/x/oauth2)
+            </div>
+            <div style="font-size:12.5px;color:var(--muted)">→ Add Redis for blacklist (replace DB query with O(1) Redis
+              SISMEMBER)</div>
+            <div style="font-size:12.5px;color:var(--muted)">→ Split into identity-service + user-service
+              (microservices)</div>
+            <div style="font-size:12.5px;color:var(--muted)">→ Add Prometheus metrics endpoint (/metrics)</div>
+            <div style="font-size:12.5px;color:var(--muted)">→ Containerize with Docker + deploy to Kubernetes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    go-auth-platform — IAM System Complete Roadmap · JWT · RBAC · HttpOnly Cookies · PostgreSQL · Clean Architecture<br>
+    <span style="color:rgba(255,255,255,.18);margin-top:6px;display:block">Part of the Go Engineering Series — <a
+        href="index.html" style="color:rgba(0,212,170,.5);text-decoration:none">← Back to Index</a></span>
+  </footer>
+  <!-- Prism Core -->
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <!-- Languages -->
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-go.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-sql.min.js"></script>
+</body>
+
+</html>
