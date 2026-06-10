@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"go-auth-platform/database"
 	"go-auth-platform/routes"
 	"net/http"
 )
 
 func main() {
+	database.ConnectPostgres()
 	r := routes.RegisterRouter()
 
 	fmt.Println("Server connected successfully on port:8080")
@@ -15,3 +17,4 @@ func main() {
 		fmt.Println("Server couldn't connected!", err)
 	}
 }
+	
