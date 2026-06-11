@@ -19,6 +19,11 @@ func main() {
 		panic(err)
 	}
 
+	err = migrations.SeedRoles()
+	if err != nil {
+		panic(err)
+	}
+
 	// Register routes and start the server
 	r := routes.RegisterRouter()
 

@@ -8,8 +8,8 @@ const (
 )
 
 var RoleHierarchy = map[string]int{
-	RoleUser:    1,
-	RoleEditor:  2,
-	RoleManager: 3,
-	RoleAdmin:   4,
+	RoleUser:    101,
+	RoleEditor:  202,
+	RoleManager: 303,
+	RoleAdmin:   404,
 }
