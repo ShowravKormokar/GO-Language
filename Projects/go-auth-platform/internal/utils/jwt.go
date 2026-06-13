@@ -138,3 +138,44 @@ func SetAccessCookie(rw http.ResponseWriter, token string) {
 		},
 	)
 }
+
+// Set refresh token on cookie
+func SetRefreshCookie(rw http.ResponseWriter, token string) {
+	http.SetCookie(
+		rw,
+		&http.Cookie{
+			Name:     "refresh_token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   config.AppConfig.CookieSecure,
+			SameSite: http.SameSiteStrictMode,
+			Expires:  time.Now().Add(config.AppConfig.JWTRefreshTTL),
+		},
+	)
+}
+
+func ClearAuthCookies(w http.ResponseWriter) {
+
+	http.SetCookie(
+		w,
+		&http.Cookie{
+			Name:     "access_token",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			MaxAge:   -1,
+		},
+	)
+
+	http.SetCookie(
+		w,
+		&http.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			MaxAge:   -1,
+		},
+	)
+}
