@@ -13,6 +13,7 @@ type TokenPair struct {
 	AccessToken, RefreshToken string
 }
 
+// Access token
 func GenerateAccessToken(userID string, email string, role string) (string, string, error) {
 	jti := uuid.NewString()
 
@@ -38,4 +39,21 @@ func GenerateAccessToken(userID string, email string, role string) (string, stri
 	}
 
 	return signed, jti, nil
+}
+
+// Refresh token
+func GenerateRefreshToken(userID string) (string, error) {
+	jti := uuid.NewString()
+
+	claims := jwt.RegisteredClaims{
+		Subject: userID,
+		ID:      jti,
+
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(config.AppConfig.JWTRefreshTTL)),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	return token.SignedString([]byte(config.AppConfig.JWTSecret))
 }
