@@ -4,6 +4,7 @@ import (
 	"errors"
 	"go-auth-platform/internal/config"
 	dto "go-auth-platform/internal/dto/claims"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -120,4 +121,20 @@ func ParseRefreshToken(tokenString string) (*jwt.RegisteredClaims, error) {
 	}
 
 	return claims, nil
+}
+
+// Cookie helper to set access token on cookie
+func SetAccessCookie(rw http.ResponseWriter, token string) {
+	http.SetCookie(
+		rw,
+		&http.Cookie{
+			Name:     "access_token",
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   config.AppConfig.CookieSecure,
+			SameSite: http.SameSiteStrictMode,
+			Expires:  time.Now().Add(config.AppConfig.JWTAccessTTL),
+		},
+	)
 }
