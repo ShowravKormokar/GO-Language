@@ -57,3 +57,18 @@ func GenerateRefreshToken(userID string) (string, error) {
 
 	return token.SignedString([]byte(config.AppConfig.JWTSecret))
 }
+
+// Token pair
+func GenerateTokenPair(userID, email, role string) (*TokenPair, string, error) {
+	accessToken, jti, err := GenerateAccessToken(userID, email, role)
+	if err != nil {
+		return nil, "", err
+	}
+
+	refreshToken, err := GenerateRefreshToken(userID)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return &TokenPair{AccessToken: accessToken, RefreshToken: refreshToken}, jti, nil
+}
