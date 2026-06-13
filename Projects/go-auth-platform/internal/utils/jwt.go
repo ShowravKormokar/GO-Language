@@ -99,3 +99,25 @@ func ParseAccessToken(tokenString string) (*dto.JWTClaims, error) {
 
 	return claims, nil
 }
+
+// Parse refresh token
+func ParseRefreshToken(tokenString string) (*jwt.RegisteredClaims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(config.AppConfig.JWTSecret), nil
+		},
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	return claims, nil
+}
