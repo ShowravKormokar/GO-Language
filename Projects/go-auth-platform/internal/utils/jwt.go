@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"go-auth-platform/internal/config"
 	dto "go-auth-platform/internal/dto/claims"
 	"time"
@@ -71,4 +72,30 @@ func GenerateTokenPair(userID, email, role string) (*TokenPair, string, error) {
 	}
 
 	return &TokenPair{AccessToken: accessToken, RefreshToken: refreshToken}, jti, nil
+}
+
+// Parse access token
+func ParseAccessToken(tokenString string) (*dto.JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&dto.JWTClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			_, ok := token.Method.(*jwt.SigningMethodHMAC)
+			if !ok {
+				return nil, errors.New("invalid signing method")
+			}
+
+			return []byte(config.AppConfig.JWTSecret), nil
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(*dto.JWTClaims)
+	if !ok || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	return claims, nil
 }
