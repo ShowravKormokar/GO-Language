@@ -1,6 +1,13 @@
 package service
 
-import "go-auth-platform/internal/repository"
+import (
+	"context"
+	"go-auth-platform/internal/constants"
+	dto "go-auth-platform/internal/dto/auth"
+	"go-auth-platform/internal/models"
+	"go-auth-platform/internal/repository"
+	"go-auth-platform/internal/utils"
+)
 
 type AuthService struct {
 	userRepo      repository.UserRepository
@@ -24,3 +31,40 @@ func NewAuthService(
 	}
 }
 
+// Register Service
+func (s *AuthService) Register(ctx context.Context, req dto.RegisterRequest) (*models.User, error) {
+	// Check email already used or not
+	existing, _ := s.userRepo.FindByEmail(ctx, req.Email)
+	if existing != nil {
+		return nil, ErrEmailAlreadyExists
+	}
+
+	// Hash password
+	hash, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get role type [user]
+	role, err := s.roleRepo.FindByName(ctx, constants.RoleUser)
+	if err != nil {
+		return nil, err
+	}
+
+	// User model to create new user
+	user := &models.User{
+		Name:         req.Name,
+		Email:        req.Email,
+		PasswordHash: hash,
+		RoleID:       role.ID,
+		IsActive:     true,
+	}
+
+	// Create/register new user
+	err = s.userRepo.Create(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
