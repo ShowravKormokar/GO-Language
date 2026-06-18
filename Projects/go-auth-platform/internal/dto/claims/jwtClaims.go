@@ -10,3 +10,8 @@ type JWTClaims struct {
 
 	jwt.RegisteredClaims
 }
+
+type RefreshResult struct {
+	AccessToken  string
+	RefreshToken string
+}

@@ -131,16 +131,88 @@ func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 
 // Logout Service
 func (s *AuthService) Logout(ctx context.Context, claims *dtoJWT.JWTClaims) error {
+	// Create a blacklisted token record
 	blacklisted := &models.BlacklistedToken{
 		JTI:       claims.JTI,
 		ExpiresAt: claims.ExpiresAt.Time,
 	}
 
+	// Create a blacklisted token record
 	err := s.blacklistRepo.Create(ctx, blacklisted)
 
 	if err != nil {
 		return nil
 	}
 
+	// Revoke all refresh tokens for the user
 	return s.refreshRepo.RevokeByUserID(ctx, uuid.MustParse(claims.UserID))
+}
+
+// Refresh token service
+func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*dtoJWT.RefreshResult, error) {
+	// Parse the refresh token and validate it
+	claims, err := utils.ParseRefreshToken(refreshToken)
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	// Check if the token is blacklisted
+	hash := utils.SHA256Hash(refreshToken)
+
+	// Check if the token is revoked
+	stored, err := s.refreshRepo.FindByHash(ctx, hash)
+	if err != nil {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	// Check if the token is revoked
+	if stored.Revoked {
+		return nil, ErrTokenRevoked
+	}
+
+	// Check if the token is expired
+	if time.Now().After(stored.ExpiresAt) {
+		return nil, ErrInvalidRefreshToken
+	}
+
+	// Get user by ID from claims
+	userId := uuid.MustParse(claims.Subject)
+
+	// Get user by ID from claims
+	user, err := s.userRepo.FindByID(ctx, userId)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+
+	// Generate new token pair
+	tokenPair, _, err := utils.GenerateTokenPair(user.ID.String(), user.Email, user.Role.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	// Revoke all previous refresh tokens for the user
+	err = s.refreshRepo.RevokeByUserID(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new refresh token record in the database
+	newHash := utils.SHA256Hash(tokenPair.RefreshToken)
+
+	// Create a new refresh token record in the database
+	err = s.refreshRepo.Create(ctx, &models.RefreshToken{
+		UserID:    user.ID,
+		TokenHash: newHash,
+		ExpiresAt: time.Now().Add(config.AppConfig.JWTRefreshTTL),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the new access and refresh tokens
+	return &dtoJWT.RefreshResult{
+		AccessToken:  tokenPair.AccessToken,
+		RefreshToken: tokenPair.RefreshToken,
+	}, nil
 }
