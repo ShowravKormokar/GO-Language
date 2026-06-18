@@ -216,3 +216,14 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*dtoJWT
 		RefreshToken: tokenPair.RefreshToken,
 	}, nil
 }
+
+func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*models.User, error) {
+	id := uuid.MustParse(userId)
+
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+
+	return user, nil
+}
