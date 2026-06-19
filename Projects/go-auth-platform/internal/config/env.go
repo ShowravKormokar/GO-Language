@@ -42,7 +42,7 @@ func LoadEnv() {
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBName:     getEnv("DB_NAME", "GOAuth"),
 		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBPassword: getEnv("DB_PASSWORD", "89@Sk#90"),
 
 		JWTSecret:     getEnv("JWT_SECRET", ""),
 		JWTAccessTTL:  accessTTL,

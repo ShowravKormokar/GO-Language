@@ -71,7 +71,13 @@ func (s *AuthService) Register(ctx context.Context, req dto.RegisterRequest) (*m
 		return nil, err
 	}
 
-	return user, nil
+	// Reload user with Role
+	userWithRole, err := s.userRepo.FindByID(ctx, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return userWithRole, nil
 }
 
 // Login sevice

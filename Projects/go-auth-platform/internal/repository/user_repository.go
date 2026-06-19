@@ -19,7 +19,11 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (r *userRepository) Create(ctx context.Context, user *models.User) error {
-	return r.db.WithContext(ctx).Create(user).Error
+	if err := r.db.WithContext(ctx).Create(user).Error; err != nil {
+		return err
+	}
+	// reload with Role
+	return r.db.WithContext(ctx).Preload("Role").First(user, "id = ?", user.ID).Error
 }
 
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
