@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"go-auth-platform/internal/constants"
 	dto "go-auth-platform/internal/dto/auth"
+	claims "go-auth-platform/internal/dto/claims"
 	cmmRes "go-auth-platform/internal/dto/common"
 	"go-auth-platform/internal/service"
 	"go-auth-platform/internal/utils"
@@ -99,6 +101,37 @@ func (h *AuthHandler) Login(rw http.ResponseWriter, rq *http.Request) {
 			Success: true,
 			Message: "login success",
 			Data:    result.User,
+		},
+	)
+}
+
+// Logout Handler
+func (h *AuthHandler) Logout(rw http.ResponseWriter, rq *http.Request) {
+
+	// Get claims
+	claims := rq.Context().Value(constants.ContextClaims).(*claims.JWTClaims)
+
+	// Perform logout operation
+	err := h.authService.Logout(rq.Context(), claims)
+	if err != nil {
+		http.Error(
+			rw,
+			"logout failed",
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	// Remove tokens form cookie
+	utils.ClearAuthCookies(rw)
+
+	// Success response
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		cmmRes.APIResponse[any]{
+			Success: true,
+			Message: "logout success",
 		},
 	)
 }
