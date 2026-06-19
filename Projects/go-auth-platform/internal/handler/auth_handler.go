@@ -19,6 +19,7 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 	}
 }
 
+// Register Handler
 func (h *AuthHandler) Register(rw http.ResponseWriter, rq *http.Request) {
 	var req dto.RegisterRequest
 
@@ -57,6 +58,47 @@ func (h *AuthHandler) Register(rw http.ResponseWriter, rq *http.Request) {
 			Success: true,
 			Message: "user created successfully",
 			Data:    user,
+		},
+	)
+}
+
+// Login Handler
+func (h *AuthHandler) Login(rw http.ResponseWriter, rq *http.Request) {
+	var req dto.LoginRequest
+
+	// Decode body and check valid or not
+	if err := json.NewDecoder(rq.Body).Decode(&req); err != nil {
+		http.Error(
+			rw,
+			"invalid body",
+			http.StatusBadRequest,
+		)
+		return
+	}
+
+	// Get successfully logged in user
+	result, err := h.authService.Login(rq.Context(), req)
+	if err != nil {
+		http.Error(
+			rw,
+			err.Error(),
+			http.StatusUnauthorized,
+		)
+		return
+	}
+
+	// Set tokens on cookie
+	utils.SetAccessCookie(rw, result.AccessToken)
+	utils.SetRefreshCookie(rw, result.RefreshToken)
+
+	// Send success response
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		cmmRes.APIResponse[any]{
+			Success: true,
+			Message: "login success",
+			Data:    result.User,
 		},
 	)
 }
