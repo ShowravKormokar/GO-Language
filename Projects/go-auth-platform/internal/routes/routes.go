@@ -2,6 +2,9 @@ package routes
 
 import (
 	"encoding/json"
+	"go-auth-platform/internal/handler"
+	"go-auth-platform/internal/middleware"
+	"go-auth-platform/internal/repository"
 	"net/http"
 	"runtime"
 	"time"
@@ -41,11 +44,37 @@ func healthHandler(rw http.ResponseWriter, rq *http.Request) {
 	json.NewEncoder(rw).Encode(response)
 }
 
-func RegisterRouter() *mux.Router {
+func RegisterRouter(
+	authHandler *handler.AuthHandler,
+	userHandler *handler.UserHandler,
+
+	blacklistRepo repository.BlacklistRepository,
+) *mux.Router {
 	r := mux.NewRouter()
 
 	// App health check
 	r.HandleFunc("/health", healthHandler).Methods("GET")
+
+	// Auth routes
+	auth := r.PathPrefix("/api/v1/auth").Subrouter()
+
+	// Public routes
+	// User Register Route
+	auth.HandleFunc("/register", authHandler.Register).Methods("POST")
+	// User Login Route
+	auth.HandleFunc("/login", authHandler.Login).Methods("POST")
+	// Token Refresh Route
+	auth.HandleFunc("/refresh", authHandler.Refresh).Methods("POST")
+
+	// Protected routes
+	protected := r.PathPrefix("/api/v1/").Subrouter()
+	// The AuthRequired middleware is applied to the protected subrouter
+	protected.Use(middleware.AuthRequired(blacklistRepo))
+
+	// User Logout Route
+	protected.HandleFunc("/logout", authHandler.Logout).Methods("POST")
+	// Get Current User Route
+	protected.HandleFunc("/users/me", userHandler.Me).Methods("GET")
 
 	return r
 }
