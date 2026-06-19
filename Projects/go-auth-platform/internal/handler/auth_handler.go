@@ -1,0 +1,62 @@
+package handler
+
+import (
+	"encoding/json"
+	dto "go-auth-platform/internal/dto/auth"
+	cmmRes "go-auth-platform/internal/dto/common"
+	"go-auth-platform/internal/service"
+	"go-auth-platform/internal/utils"
+	"net/http"
+)
+
+type AuthHandler struct {
+	authService *service.AuthService
+}
+
+func NewAuthHandler(authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{
+		authService: authService,
+	}
+}
+
+func (h *AuthHandler) Register(rw http.ResponseWriter, rq *http.Request) {
+	var req dto.RegisterRequest
+
+	// Decode req body and check it correct or not
+	if err := json.NewDecoder(rq.Body).Decode(&req); err != nil {
+		utils.JSON(
+			rw,
+			http.StatusBadRequest,
+			cmmRes.ErrorResponse{
+				Success: true,
+				Message: "invalid request body",
+			},
+		)
+		return
+	}
+
+	// Set user through service
+	user, err := h.authService.Register(rq.Context(), req)
+	if err != nil {
+		utils.JSON(
+			rw,
+			http.StatusBadRequest,
+			cmmRes.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	// Success to response as success
+	utils.JSON(
+		rw,
+		http.StatusCreated,
+		cmmRes.APIResponse[any]{
+			Success: true,
+			Message: "user created successfully",
+			Data:    user,
+		},
+	)
+}
