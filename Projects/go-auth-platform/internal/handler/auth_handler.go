@@ -135,3 +135,43 @@ func (h *AuthHandler) Logout(rw http.ResponseWriter, rq *http.Request) {
 		},
 	)
 }
+
+// Refresh Token Handler
+func (h *AuthHandler) Refresh(rw http.ResponseWriter, rq *http.Request) {
+
+	// Get current refresh token
+	cookie, err := rq.Cookie("refresh_token")
+	if err != nil {
+		http.Error(
+			rw,
+			"missing refresh token",
+			http.StatusUnauthorized,
+		)
+		return
+	}
+
+	// Refresh token to get new tokens
+	result, err := h.authService.Refresh(rq.Context(), cookie.Value)
+	if err != nil {
+		http.Error(
+			rw,
+			"invalid refresh token",
+			http.StatusUnauthorized,
+		)
+		return
+	}
+
+	// Set new tokens on cookie
+	utils.SetAccessCookie(rw, result.AccessToken)
+	utils.SetRefreshCookie(rw, result.RefreshToken)
+
+	// Success response
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		cmmRes.APIResponse[any]{
+			Success: true,
+			Message: "token refreshed",
+		},
+	)
+}
