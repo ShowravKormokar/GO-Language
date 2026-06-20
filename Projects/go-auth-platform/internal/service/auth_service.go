@@ -6,6 +6,8 @@ import (
 	"go-auth-platform/internal/constants"
 	dto "go-auth-platform/internal/dto/auth"
 	dtoJWT "go-auth-platform/internal/dto/claims"
+	userDTO "go-auth-platform/internal/dto/user"
+	"go-auth-platform/internal/mapper"
 	"go-auth-platform/internal/models"
 	"go-auth-platform/internal/repository"
 	"go-auth-platform/internal/utils"
@@ -129,7 +131,7 @@ func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Log
 	_ = s.userRepo.Update(ctx, user)
 
 	return &dto.LoginResult{
-		User:         user,
+		User:         mapper.ToUserResponse(user),
 		AccessToken:  tokenPair.AccessToken,
 		RefreshToken: tokenPair.RefreshToken,
 	}, nil
@@ -223,7 +225,7 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*dtoJWT
 	}, nil
 }
 
-func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*models.User, error) {
+func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*userDTO.UserProfileResponse, error) {
 	id := uuid.MustParse(userId)
 
 	user, err := s.userRepo.FindByID(ctx, id)
@@ -231,5 +233,7 @@ func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*model
 		return nil, ErrUserNotFound
 	}
 
-	return user, nil
+	response := mapper.ToUserProfileResponse(user)
+
+	return &response, nil
 }

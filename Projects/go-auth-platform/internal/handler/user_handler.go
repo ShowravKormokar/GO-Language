@@ -40,6 +40,7 @@ func (u *UserHandler) Me(rw http.ResponseWriter, rq *http.Request) {
 		http.StatusOK,
 		cmmRes.APIResponse[any]{
 			Success: true,
+			Message: "profile fetched",
 			Data:    user,
 		},
 	)
