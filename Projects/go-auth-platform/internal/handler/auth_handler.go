@@ -39,7 +39,7 @@ func (h *AuthHandler) Register(rw http.ResponseWriter, rq *http.Request) {
 	}
 
 	// Set user through service
-	user, err := h.authService.Register(rq.Context(), req)
+	_, err := h.authService.Register(rq.Context(), req)
 	if err != nil {
 		utils.JSON(
 			rw,
@@ -58,8 +58,7 @@ func (h *AuthHandler) Register(rw http.ResponseWriter, rq *http.Request) {
 		http.StatusCreated,
 		cmmRes.APIResponse[any]{
 			Success: true,
-			Message: "user created successfully",
-			Data:    user,
+			Message: "user created successfully, please login to continue",
 		},
 	)
 }
