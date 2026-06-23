@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 
+	clDto "go-auth-platform/internal/dto/claims"
 	urdto "go-auth-platform/internal/dto/user"
 	"go-auth-platform/internal/mapper"
+	"go-auth-platform/internal/models"
 	"go-auth-platform/internal/repository"
 	"go-auth-platform/internal/utils"
 
@@ -13,14 +15,16 @@ import (
 )
 
 type UserService struct {
-	userRepo    repository.UserRepository
-	refreshRepo repository.RefreshTokenRepository
+	userRepo      repository.UserRepository
+	refreshRepo   repository.RefreshTokenRepository
+	blacklistRepo repository.BlacklistRepository
 }
 
-func NewUserService(userRepo repository.UserRepository, refreshRepo repository.RefreshTokenRepository) *UserService {
+func NewUserService(userRepo repository.UserRepository, refreshRepo repository.RefreshTokenRepository, blacklistRepo repository.BlacklistRepository) *UserService {
 	return &UserService{
-		userRepo:    userRepo,
-		refreshRepo: refreshRepo,
+		userRepo:      userRepo,
+		refreshRepo:   refreshRepo,
+		blacklistRepo: blacklistRepo,
 	}
 }
 
@@ -39,7 +43,7 @@ func (s *UserService) GetCurrentUser(ctx context.Context, userId string) (*urdto
 }
 
 // Change password (Logged in user)
-func (s *UserService) ChangePassword(ctx context.Context, userID string, req urdto.ChangePasswordRequest) error {
+func (s *UserService) ChangePassword(ctx context.Context, userID string, claims *clDto.JWTClaims, req urdto.ChangePasswordRequest) error {
 	id, err := uuid.Parse(userID)
 	if err != nil {
 		return errors.New("invalid user id")
@@ -72,8 +76,20 @@ func (s *UserService) ChangePassword(ctx context.Context, userID string, req urd
 		return err
 	}
 
-	// Logout all devices
+	// Logout all other devices
 	err = s.refreshRepo.RevokeByUserID(ctx, currentUser.ID)
+	if err != nil {
+		return err
+	}
+
+	// blacklist current access token - logout current device
+	err = s.blacklistRepo.Create(
+		ctx,
+		&models.BlacklistedToken{
+			JTI:       claims.JTI,
+			ExpiresAt: claims.ExpiresAt.Time,
+		},
+	)
 
 	return err
 }

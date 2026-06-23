@@ -33,7 +33,7 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, refreshRepo, blacklistRepo)
-	userService := service.NewUserService(userRepo, refreshRepo)
+	userService := service.NewUserService(userRepo, refreshRepo, blacklistRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)

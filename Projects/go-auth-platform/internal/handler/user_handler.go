@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"go-auth-platform/internal/constants"
+	dtoJWT "go-auth-platform/internal/dto/claims"
 	cmmRes "go-auth-platform/internal/dto/common"
 	dto "go-auth-platform/internal/dto/common"
 	urdto "go-auth-platform/internal/dto/user"
@@ -71,15 +72,18 @@ func (u *UserHandler) ChangePassword(rw http.ResponseWriter, rq *http.Request) {
 	// Get current logged in user-id
 	userID := rq.Context().Value(constants.ContextUserID).(string)
 
+	// claims
+	claims := rq.Context().Value(constants.ContextClaims).(*dtoJWT.JWTClaims)
+
 	// Change password using service method
-	err = u.userService.ChangePassword(rq.Context(), userID, req)
+	err = u.userService.ChangePassword(rq.Context(), userID, claims, req)
 	if err != nil {
 		utils.JSON(
 			rw,
 			http.StatusInternalServerError,
 			dto.ErrorResponse{
 				Success: false,
-				Message: "something went wrong",
+				Message: err.Error(),
 			},
 		)
 		return

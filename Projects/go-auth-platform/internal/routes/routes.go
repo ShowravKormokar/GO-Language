@@ -75,6 +75,8 @@ func RegisterRouter(
 	protected.HandleFunc("/logout", authHandler.Logout).Methods("POST")
 	// Get Current User Route
 	protected.HandleFunc("/users/me", userHandler.Me).Methods("GET")
+	// Change password - Current login user
+	protected.HandleFunc("/users/me/password", userHandler.ChangePassword).Methods("PATCH")
 
 	return r
 }
