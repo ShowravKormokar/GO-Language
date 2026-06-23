@@ -32,3 +32,9 @@ type BlacklistRepository interface {
 	ExistsByJTI(ctx context.Context, jti string) (bool, error)
 	DeleteExpired(ctx context.Context) error
 }
+
+type PasswordResetRepository interface {
+	Create(ctx context.Context, token *models.PasswordResetToken) error
+	FindValidToken(ctx context.Context, hash string) (*models.PasswordResetToken, error)
+	MarkUsed(ctx context.Context, id uuid.UUID) error
+}

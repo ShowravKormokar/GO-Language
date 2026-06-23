@@ -12,6 +12,7 @@ func RunMigrations() error {
 		&models.User{},
 		&models.RefreshToken{},
 		&models.BlacklistedToken{},
+		models.PasswordResetToken{},
 	)
 
 	if err != nil {
