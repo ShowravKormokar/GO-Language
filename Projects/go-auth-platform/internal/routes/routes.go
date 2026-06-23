@@ -47,6 +47,7 @@ func healthHandler(rw http.ResponseWriter, rq *http.Request) {
 func RegisterRouter(
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	passwordHandler *handler.PasswordHandler,
 
 	blacklistRepo repository.BlacklistRepository,
 ) *mux.Router {
@@ -65,6 +66,10 @@ func RegisterRouter(
 	auth.HandleFunc("/login", authHandler.Login).Methods("POST")
 	// Token Refresh Route
 	auth.HandleFunc("/refresh", authHandler.Refresh).Methods("POST")
+	// Forgot Password Route
+	auth.HandleFunc("/forgot-password", passwordHandler.ForgotPassword).Methods("POST")
+	// Reset Password Route
+	auth.HandleFunc("/reset-password", passwordHandler.ResetPassword).Methods("POST")
 
 	// Protected routes
 	protected := r.PathPrefix("/api/v1/").Subrouter()

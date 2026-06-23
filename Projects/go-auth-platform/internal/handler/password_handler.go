@@ -11,11 +11,11 @@ import (
 
 // Dependency Inject
 type PasswordHandler struct {
-	passwordService service.PasswordService
+	passwordService *service.PasswordService
 }
 
 // Constructor
-func NewPasswordHandler(passwordService service.PasswordService) *PasswordHandler {
+func NewPasswordHandler(passwordService *service.PasswordService) *PasswordHandler {
 
 	return &PasswordHandler{
 		passwordService: passwordService,

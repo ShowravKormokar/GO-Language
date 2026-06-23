@@ -29,18 +29,21 @@ func main() {
 	userRepo := repository.NewUserRepository(config.DB)
 	roleRepo := repository.NewRoleRepository(config.DB)
 	refreshRepo := repository.NewRefreshTokenRepository(config.DB)
+	resetRepo := repository.NewPasswordResetRepository(config.DB)
 	blacklistRepo := repository.NewBlacklistRepository(config.DB)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, refreshRepo, blacklistRepo)
 	userService := service.NewUserService(userRepo, refreshRepo, blacklistRepo)
+	passwordService := service.NewPasswordService(userRepo, resetRepo, refreshRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
+	passResetHandler := handler.NewPasswordHandler(passwordService)
 
 	// Register routes
-	r := routes.RegisterRouter(authHandler, userHandler, blacklistRepo)
+	r := routes.RegisterRouter(authHandler, userHandler, passResetHandler, blacklistRepo)
 
 	fmt.Printf("%s running on port %s\n", config.AppConfig.AppName, config.AppConfig.AppPort)
 	if err := http.ListenAndServe(":"+config.AppConfig.AppPort, r); err != nil {
