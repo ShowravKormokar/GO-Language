@@ -70,10 +70,32 @@ func (u *UserHandler) ChangePassword(rw http.ResponseWriter, rq *http.Request) {
 	}
 
 	// Get current logged in user-id
-	userID := rq.Context().Value(constants.ContextUserID).(string)
+	userID, ok := rq.Context().Value(constants.ContextUserID).(string)
+	if !ok {
+		utils.JSON(
+			rw,
+			http.StatusUnauthorized,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "unauthorized",
+			},
+		)
+		return
+	}
 
 	// claims
-	claims := rq.Context().Value(constants.ContextClaims).(*dtoJWT.JWTClaims)
+	claims, ok := rq.Context().Value(constants.ContextClaims).(*dtoJWT.JWTClaims)
+	if !ok {
+		utils.JSON(
+			rw,
+			http.StatusUnauthorized,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "invalid token claims",
+			},
+		)
+		return
+	}
 
 	// Change password using service method
 	err = u.userService.ChangePassword(rq.Context(), userID, claims, req)
