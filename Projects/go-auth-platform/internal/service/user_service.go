@@ -1,0 +1,63 @@
+package service
+
+import (
+	"context"
+	"errors"
+
+	urdto "go-auth-platform/internal/dto/user"
+	"go-auth-platform/internal/repository"
+	"go-auth-platform/internal/utils"
+
+	"github.com/google/uuid"
+)
+
+type UserService struct {
+	userRepo    repository.UserRepository
+	refreshRepo repository.RefreshTokenRepository
+}
+
+func NewUserService(userRepo repository.UserRepository, refreshRepo repository.RefreshTokenRepository) *UserService {
+	return &UserService{
+		userRepo:    userRepo,
+		refreshRepo: refreshRepo,
+	}
+}
+
+func (s *UserService) ChangePassword(ctx context.Context, userID string, req urdto.ChangePasswordRequest) error {
+	id, err := uuid.Parse(userID)
+	if err != nil {
+		return errors.New("invalid user id")
+	}
+
+	// Get current logged in user
+	currentUser, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	// Old password check
+	err = utils.CheckPassword(currentUser.PasswordHash, req.CurrentPassword)
+	if err != nil {
+		return errors.New("current password is incorrect")
+	}
+
+	// Hash new password
+	newHashPass, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return errors.New("something went wrong")
+	}
+
+	// Assign new password
+	currentUser.PasswordHash = newHashPass
+
+	// Update databse (user password update)
+	err = s.userRepo.Update(ctx, currentUser)
+	if err != nil {
+		return err
+	}
+
+	// Logout all devices
+	err = s.refreshRepo.RevokeByUserID(ctx, currentUser.ID)
+
+	return err
+}
