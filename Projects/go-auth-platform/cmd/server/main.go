@@ -33,10 +33,11 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, refreshRepo, blacklistRepo)
+	userService := service.NewUserService(userRepo, refreshRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)
-	userHandler := handler.NewUserHandler(authService)
+	userHandler := handler.NewUserHandler(userService)
 
 	// Register routes
 	r := routes.RegisterRouter(authHandler, userHandler, blacklistRepo)

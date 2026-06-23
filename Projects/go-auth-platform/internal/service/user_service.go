@@ -25,7 +25,7 @@ func NewUserService(userRepo repository.UserRepository, refreshRepo repository.R
 }
 
 // Get current logged in user
-func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*urdto.UserProfileResponse, error) {
+func (s *UserService) GetCurrentUser(ctx context.Context, userId string) (*urdto.UserProfileResponse, error) {
 	id := uuid.MustParse(userId)
 
 	user, err := s.userRepo.FindByID(ctx, id)

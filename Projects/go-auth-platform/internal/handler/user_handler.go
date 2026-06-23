@@ -1,18 +1,21 @@
 package handler
 
 import (
+	"encoding/json"
 	"go-auth-platform/internal/constants"
 	cmmRes "go-auth-platform/internal/dto/common"
+	dto "go-auth-platform/internal/dto/common"
+	urdto "go-auth-platform/internal/dto/user"
 	"go-auth-platform/internal/service"
 	"go-auth-platform/internal/utils"
 	"net/http"
 )
 
 type UserHandler struct {
-	userService *service.AuthService
+	userService *service.UserService
 }
 
-func NewUserHandler(userService *service.AuthService) *UserHandler {
+func NewUserHandler(userService *service.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}
@@ -42,6 +45,53 @@ func (u *UserHandler) Me(rw http.ResponseWriter, rq *http.Request) {
 			Success: true,
 			Message: "profile fetched",
 			Data:    user,
+		},
+	)
+}
+
+// Change password handler
+func (u *UserHandler) ChangePassword(rw http.ResponseWriter, rq *http.Request) {
+	var req urdto.ChangePasswordRequest
+
+	// Decode to get user req (request body)
+	err := json.NewDecoder(rq.Body).Decode(&req)
+	if err != nil {
+
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "invalid body",
+			},
+		)
+		return
+	}
+
+	// Get current logged in user-id
+	userID := rq.Context().Value(constants.ContextUserID).(string)
+
+	// Change password using service method
+	err = u.userService.ChangePassword(rq.Context(), userID, req)
+	if err != nil {
+		utils.JSON(
+			rw,
+			http.StatusInternalServerError,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "something went wrong",
+			},
+		)
+		return
+	}
+
+	// Success response
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		dto.APIResponse[any]{
+			Success: true,
+			Message: "password changed successfully, please login",
 		},
 	)
 }
