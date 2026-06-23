@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	urdto "go-auth-platform/internal/dto/user"
+	"go-auth-platform/internal/mapper"
 	"go-auth-platform/internal/repository"
 	"go-auth-platform/internal/utils"
 
@@ -23,13 +24,28 @@ func NewUserService(userRepo repository.UserRepository, refreshRepo repository.R
 	}
 }
 
+// Get current logged in user
+func (s *AuthService) GetCurrentUser(ctx context.Context, userId string) (*urdto.UserProfileResponse, error) {
+	id := uuid.MustParse(userId)
+
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, ErrUserNotFound
+	}
+
+	response := mapper.ToUserProfileResponse(user)
+
+	return &response, nil
+}
+
+// Change password (Logged in user)
 func (s *UserService) ChangePassword(ctx context.Context, userID string, req urdto.ChangePasswordRequest) error {
 	id, err := uuid.Parse(userID)
 	if err != nil {
 		return errors.New("invalid user id")
 	}
 
-	// Get current logged in user
+	// Find user by ID (Basically current user)
 	currentUser, err := s.userRepo.FindByID(ctx, id)
 	if err != nil {
 		return errors.New("user not found")
