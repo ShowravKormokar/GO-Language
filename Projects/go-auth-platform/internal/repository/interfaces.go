@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	admDto "go-auth-platform/internal/dto/admin"
 	"go-auth-platform/internal/models"
 
 	"github.com/google/uuid"
@@ -37,4 +38,8 @@ type PasswordResetRepository interface {
 	Create(ctx context.Context, token *models.PasswordResetToken) error
 	FindValidToken(ctx context.Context, hash string) (*models.PasswordResetToken, error)
 	MarkUsed(ctx context.Context, id uuid.UUID) error
+}
+
+type AdminUserRepository interface {
+	ListUsers(ctx context.Context, query admDto.AdminUserQuery) ([]models.User, int64, error)
 }
