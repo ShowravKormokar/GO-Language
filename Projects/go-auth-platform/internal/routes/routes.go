@@ -47,6 +47,7 @@ func healthHandler(rw http.ResponseWriter, rq *http.Request) {
 func RegisterRouter(
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	adminHandler *handler.AdminHandler,
 	passwordHandler *handler.PasswordHandler,
 
 	blacklistRepo repository.BlacklistRepository,
@@ -82,6 +83,14 @@ func RegisterRouter(
 	protected.HandleFunc("/users/me", userHandler.Me).Methods("GET")
 	// Change password - Current login user
 	protected.HandleFunc("/users/me/password", userHandler.ChangePassword).Methods("PATCH")
+
+	// Admin Routes [Protected: Auth + Role]
+	admin := r.PathPrefix("/api/v1/admin").Subrouter()
+	admin.Use(middleware.AuthRequired(blacklistRepo)) // Auth middleware
+	admin.Use(middleware.RequireMinRole("admin"))     // Role middleware
+
+	// Get all users route
+	admin.HandleFunc("/users", adminHandler.GetUsers).Methods("GET")
 
 	return r
 }

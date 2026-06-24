@@ -62,6 +62,7 @@ func (h *AdminHandler) GetUsers(rw http.ResponseWriter, rq *http.Request) {
 	json.NewEncoder(rw).Encode(
 		dto.APIResponse[pgDto.PaginatedResponse[admDto.AdminUserResponse]]{
 			Success: true,
+			Message: "users fetched successfully",
 			Data:    result,
 		},
 	)
