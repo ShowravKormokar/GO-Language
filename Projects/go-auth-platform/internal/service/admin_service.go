@@ -2,11 +2,15 @@ package service
 
 import (
 	"context"
+	"errors"
 	admDto "go-auth-platform/internal/dto/admin"
 	pgDto "go-auth-platform/internal/dto/paginated"
 	usrDto "go-auth-platform/internal/dto/user"
+	"go-auth-platform/internal/mapper"
 	"go-auth-platform/internal/repository"
 	"math"
+
+	"github.com/google/uuid"
 )
 
 type AdminService struct {
@@ -57,4 +61,23 @@ func (s *AdminService) GetUsers(ctx context.Context, q admDto.AdminUserQuery) (p
 			HasPrev: q.Page > 1,
 		},
 	}, nil
+}
+
+func (s *AdminService) GetUserByID(ctx context.Context, id string) (*usrDto.UserProfileResponse, error) {
+	userID, err := uuid.Parse(id)
+
+	if err != nil {
+		return nil, errors.New(
+			"invalid user id",
+		)
+	}
+
+	user, err := s.admUsrRepo.FindUserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := mapper.ToUserProfileResponse(user)
+
+	return &response, nil
 }
