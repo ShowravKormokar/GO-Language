@@ -9,9 +9,13 @@ import (
 	"go-auth-platform/internal/routes"
 	"go-auth-platform/internal/service"
 	"net/http"
+	"runtime"
 )
 
 func main() {
+	// Set server processor
+	runtime.GOMAXPROCS(2)
+
 	// Load environment variables
 	config.LoadEnv()
 	// Connect to the database
