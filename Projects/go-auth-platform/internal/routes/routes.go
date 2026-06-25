@@ -55,6 +55,8 @@ func RegisterRouter(
 
 	// Get all users route
 	admin.HandleFunc("/users", adminHandler.GetUsers).Methods("GET")
+	// Get specific user by id
+	admin.HandleFunc("/users/{id}", adminHandler.GetUserById).Methods("GET")
 
 	return r
 }
