@@ -8,7 +8,6 @@ import (
 	cmmRes "go-auth-platform/internal/dto/common"
 	dto "go-auth-platform/internal/dto/common"
 	urdto "go-auth-platform/internal/dto/user"
-	"go-auth-platform/internal/mapper"
 	"go-auth-platform/internal/service"
 	"go-auth-platform/internal/utils"
 	"net/http"
@@ -143,9 +142,21 @@ func (u *UserHandler) AssignRole(rw http.ResponseWriter, rq *http.Request) {
 		return
 	}
 
+	if req.RoleID == 191 {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "incorrect role id",
+			},
+		)
+		return
+	}
+
 	id := mux.Vars(rq)["id"]
 
-	user, err := u.userService.AssignRole(rq.Context(), id, req)
+	_, err = u.userService.AssignRole(rq.Context(), id, req)
 
 	if err != nil {
 		utils.JSON(
@@ -162,10 +173,9 @@ func (u *UserHandler) AssignRole(rw http.ResponseWriter, rq *http.Request) {
 	utils.JSON(
 		rw,
 		200,
-		dto.APIResponse[urdto.UserResponse]{
+		dto.APIResponse[any]{
 			Success: true,
 			Message: "role updated",
-			Data:    mapper.ToUserResponse(user),
 		},
 	)
 

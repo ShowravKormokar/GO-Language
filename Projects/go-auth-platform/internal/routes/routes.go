@@ -57,6 +57,8 @@ func RegisterRouter(
 	admin.HandleFunc("/users", adminHandler.GetUsers).Methods("GET")
 	// Get specific user by id
 	admin.HandleFunc("/users/{id}", adminHandler.GetUserById).Methods("GET")
+	// Assign role to the user
+	admin.HandleFunc("/users/{id}/role", userHandler.AssignRole).Methods("PATCH")
 
 	return r
 }
