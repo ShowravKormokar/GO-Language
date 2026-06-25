@@ -28,6 +28,17 @@ func (r *roleRepository) FindByName(ctx context.Context, name string) (*models.R
 	return &role, nil
 }
 
+func (r *roleRepository) FindByID(ctx context.Context, id uint) (*models.Role, error) {
+	var role models.Role
+
+	err := r.db.WithContext(ctx).First(&role, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &role, nil
+}
+
 func (r *roleRepository) FindAll(ctx context.Context) ([]models.Role, error) {
 	var roles []models.Role
 

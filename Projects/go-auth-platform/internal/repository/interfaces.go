@@ -19,6 +19,7 @@ type UserRepository interface {
 
 type RoleRepository interface {
 	FindByName(ctx context.Context, name string) (*models.Role, error)
+	FindByID(ctx context.Context, id uint) (*models.Role, error)
 	FindAll(ctx context.Context) ([]models.Role, error)
 }
 
