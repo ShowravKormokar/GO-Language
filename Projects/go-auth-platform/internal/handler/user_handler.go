@@ -180,3 +180,46 @@ func (u *UserHandler) AssignRole(rw http.ResponseWriter, rq *http.Request) {
 	)
 
 }
+
+func (h *UserHandler) UpdateUserStatus(rw http.ResponseWriter, rq *http.Request) {
+	var req admDto.UpdateUserStatusRequest
+
+	err := json.NewDecoder(rq.Body).Decode(&req)
+
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "invalid request",
+			},
+		)
+		return
+	}
+
+	id := mux.Vars(rq)["id"]
+
+	_, err = h.userService.UpdateUserStatus(rq.Context(), id, req)
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	utils.JSON(
+		rw,
+		200,
+		dto.APIResponse[any]{
+			Success: true,
+			Message: "user status updated",
+		},
+	)
+
+}

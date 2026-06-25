@@ -27,3 +27,7 @@ type AdminUserResponse struct {
 type AssignRoleRequest struct {
 	RoleID uint `json:"role_id" validate:"required"`
 }
+
+type UpdateUserStatusRequest struct {
+	IsActive bool `json:"is_active"`
+}

@@ -60,5 +60,12 @@ func RegisterRouter(
 	// Assign role to the user
 	admin.HandleFunc("/users/{id}/role", userHandler.AssignRole).Methods("PATCH")
 
+	// Admin + Manager Routes [Protected: Auth + Role]
+	admin_manager := r.PathPrefix("/api/v1/admin").Subrouter()
+	admin_manager.Use(middleware.AuthRequired(blacklistRepo)) // Auth middleware
+	admin_manager.Use(middleware.RequireMinRole("manager"))     // Role middleware
+	// Change user status [active/deactive]
+	admin_manager.HandleFunc("/users/{id}/status", userHandler.UpdateUserStatus).Methods("PATCH")
+
 	return r
 }

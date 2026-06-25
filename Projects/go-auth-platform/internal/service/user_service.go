@@ -127,3 +127,35 @@ func (s *UserService) AssignRole(ctx context.Context, targetUserID string, req a
 	return user, nil
 
 }
+
+func (s *UserService) UpdateUserStatus(ctx context.Context, targetUserID string, req admDto.UpdateUserStatusRequest) (*models.User, error) {
+	id, err := uuid.Parse(targetUserID)
+
+	if err != nil {
+		return nil, errors.New("invalid user id")
+	}
+
+	// find user
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// update status
+	user.IsActive = req.IsActive
+
+	err = s.userRepo.Update(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	// If account disabled -> logout all devices
+	if !req.IsActive {
+		err = s.refreshRepo.RevokeByUserID(ctx, user.ID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
+}
