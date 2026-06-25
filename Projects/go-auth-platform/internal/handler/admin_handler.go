@@ -5,9 +5,14 @@ import (
 	admDto "go-auth-platform/internal/dto/admin"
 	dto "go-auth-platform/internal/dto/common"
 	pgDto "go-auth-platform/internal/dto/paginated"
+	urdto "go-auth-platform/internal/dto/user"
+
 	"go-auth-platform/internal/service"
+	"go-auth-platform/internal/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type AdminHandler struct {
@@ -66,4 +71,33 @@ func (h *AdminHandler) GetUsers(rw http.ResponseWriter, rq *http.Request) {
 			Data:    result,
 		},
 	)
+}
+
+// Get specific user by id
+func (h *AdminHandler) GetUserById(rw http.ResponseWriter, rq *http.Request) {
+	id := mux.Vars(rq)["id"]
+
+	user, err := h.admService.GetUserByID(rq.Context(), id)
+	if err != nil {
+		utils.JSON(
+			rw,
+			http.StatusNotFound,
+			dto.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		dto.APIResponse[*urdto.UserProfileResponse]{
+			Success: true,
+			Message: "user fetched successfully",
+			Data:    user,
+		},
+	)
+
 }
