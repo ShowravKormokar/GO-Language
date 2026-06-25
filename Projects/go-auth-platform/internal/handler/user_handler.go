@@ -3,13 +3,17 @@ package handler
 import (
 	"encoding/json"
 	"go-auth-platform/internal/constants"
+	admDto "go-auth-platform/internal/dto/admin"
 	dtoJWT "go-auth-platform/internal/dto/claims"
 	cmmRes "go-auth-platform/internal/dto/common"
 	dto "go-auth-platform/internal/dto/common"
 	urdto "go-auth-platform/internal/dto/user"
+	"go-auth-platform/internal/mapper"
 	"go-auth-platform/internal/service"
 	"go-auth-platform/internal/utils"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type UserHandler struct {
@@ -120,4 +124,49 @@ func (u *UserHandler) ChangePassword(rw http.ResponseWriter, rq *http.Request) {
 			Message: "password changed successfully, please login",
 		},
 	)
+}
+
+// Assign role
+func (u *UserHandler) AssignRole(rw http.ResponseWriter, rq *http.Request) {
+	var req admDto.AssignRoleRequest
+
+	err := json.NewDecoder(rq.Body).Decode(&req)
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "invalid request",
+			},
+		)
+		return
+	}
+
+	id := mux.Vars(rq)["id"]
+
+	user, err := u.userService.AssignRole(rq.Context(), id, req)
+
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	utils.JSON(
+		rw,
+		200,
+		dto.APIResponse[urdto.UserResponse]{
+			Success: true,
+			Message: "role updated",
+			Data:    mapper.ToUserResponse(user),
+		},
+	)
+
 }

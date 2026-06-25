@@ -39,7 +39,7 @@ func main() {
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, roleRepo, refreshRepo, blacklistRepo)
-	userService := service.NewUserService(userRepo, refreshRepo, blacklistRepo)
+	userService := service.NewUserService(userRepo, roleRepo, refreshRepo, blacklistRepo)
 	passwordService := service.NewPasswordService(userRepo, resetRepo, refreshRepo)
 	adminService := service.NewAdminUserService(adminRepo)
 

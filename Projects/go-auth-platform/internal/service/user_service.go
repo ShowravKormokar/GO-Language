@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	admDto "go-auth-platform/internal/dto/admin"
 	clDto "go-auth-platform/internal/dto/claims"
 	urdto "go-auth-platform/internal/dto/user"
 	"go-auth-platform/internal/mapper"
@@ -16,13 +17,15 @@ import (
 
 type UserService struct {
 	userRepo      repository.UserRepository
+	roleRepo      repository.RoleRepository
 	refreshRepo   repository.RefreshTokenRepository
 	blacklistRepo repository.BlacklistRepository
 }
 
-func NewUserService(userRepo repository.UserRepository, refreshRepo repository.RefreshTokenRepository, blacklistRepo repository.BlacklistRepository) *UserService {
+func NewUserService(userRepo repository.UserRepository, roleRepo repository.RoleRepository, refreshRepo repository.RefreshTokenRepository, blacklistRepo repository.BlacklistRepository) *UserService {
 	return &UserService{
 		userRepo:      userRepo,
+		roleRepo:      roleRepo,
 		refreshRepo:   refreshRepo,
 		blacklistRepo: blacklistRepo,
 	}
@@ -92,4 +95,35 @@ func (s *UserService) ChangePassword(ctx context.Context, userID string, claims 
 	)
 
 	return err
+}
+
+// Assign role (update user)
+func (s *UserService) AssignRole(ctx context.Context, targetUserID string, req admDto.AssignRoleRequest) (*models.User, error) {
+	userId, err := uuid.Parse(targetUserID)
+	if err != nil {
+		return nil, errors.New("invalid user id")
+	}
+
+	user, err := s.userRepo.FindByID(ctx, userId)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	role, err := s.roleRepo.FindByID(ctx, req.RoleID)
+	if err != nil {
+		return nil, errors.New("role not found")
+	}
+
+	// assign
+	user.RoleID = role.ID
+	user.Role = *role
+
+	err = s.userRepo.Update(ctx, user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+
 }
