@@ -2,9 +2,11 @@ package repository
 
 import (
 	"context"
+	"errors"
 	admDto "go-auth-platform/internal/dto/admin"
 	"go-auth-platform/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -69,4 +71,16 @@ func (r *adminUserRepo) ListUsers(ctx context.Context, query admDto.AdminUserQue
 	err := db.Limit(query.Limit).Offset(offset).Find(&user).Error
 
 	return user, total, err
+}
+
+// Find user by ID
+func (r *adminUserRepo) FindUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	var user models.User
+
+	err := r.db.WithContext(ctx).Preload("Role").Where("ID = ?", id).First(&user).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not found")
+	}
+
+	return &user, err
 }
