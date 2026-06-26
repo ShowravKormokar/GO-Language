@@ -31,3 +31,10 @@ type AssignRoleRequest struct {
 type UpdateUserStatusRequest struct {
 	IsActive bool `json:"is_active"`
 }
+
+type AdminUpdateUserRequest struct {
+	Name     *string `json:"name"` //Pointer tells:nil = not provided, value = update this field
+	Email    *string `json:"email"`
+	RoleID   *uint   `json:"role_id"`
+	IsActive *bool   `json:"is_active"`
+}

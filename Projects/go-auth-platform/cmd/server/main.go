@@ -41,7 +41,7 @@ func main() {
 	authService := service.NewAuthService(userRepo, roleRepo, refreshRepo, blacklistRepo)
 	userService := service.NewUserService(userRepo, roleRepo, refreshRepo, blacklistRepo)
 	passwordService := service.NewPasswordService(userRepo, resetRepo, refreshRepo)
-	adminService := service.NewAdminUserService(adminRepo,roleRepo)
+	adminService := service.NewAdminUserService(adminRepo, userRepo, roleRepo, refreshRepo)
 
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService)

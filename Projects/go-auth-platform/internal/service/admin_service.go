@@ -14,14 +14,18 @@ import (
 )
 
 type AdminService struct {
-	admUsrRepo repository.AdminUserRepository
-	roleRepo   repository.RoleRepository
+	admUsrRepo  repository.AdminUserRepository
+	userRepo    repository.UserRepository
+	roleRepo    repository.RoleRepository
+	refreshRepo repository.RefreshTokenRepository
 }
 
-func NewAdminUserService(admUsrRepo repository.AdminUserRepository, roleRepo repository.RoleRepository) *AdminService {
+func NewAdminUserService(admUsrRepo repository.AdminUserRepository, userRepo repository.UserRepository, roleRepo repository.RoleRepository, refreshRepo repository.RefreshTokenRepository) *AdminService {
 	return &AdminService{
-		admUsrRepo: admUsrRepo,
-		roleRepo:   roleRepo,
+		admUsrRepo:  admUsrRepo,
+		userRepo:    userRepo,
+		roleRepo:    roleRepo,
+		refreshRepo: refreshRepo,
 	}
 }
 
@@ -105,4 +109,60 @@ func (s *AdminService) GetAllRole(ctx context.Context) ([]usrDto.RoleResponse, e
 		)
 	}
 	return response, nil
+}
+
+// Update user by ID
+func (s *AdminService) UpdateUser(ctx context.Context, userID string, req admDto.AdminUpdateUserRequest) error {
+	id, err := uuid.Parse(userID)
+	if err != nil {
+		return errors.New("invalid user id")
+	}
+
+	user, err := s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	// Update Name
+	if req.Name != nil {
+		if *req.Name == "" {
+			return errors.New("name cannot be empty")
+		}
+		user.Name = *req.Name
+	}
+
+	// Update Email
+	if req.Email != nil {
+		if *req.Email == "" {
+			return errors.New("email cannot be empty")
+		}
+
+		existing, err := s.userRepo.FindByEmail(ctx, *req.Email)
+
+		if err == nil && existing.ID != user.ID {
+			return errors.New("email already exists")
+		}
+		user.Email = *req.Email
+	}
+
+	// Update Role
+	if req.RoleID != nil {
+		user.RoleID = *req.RoleID
+	}
+
+	// Update Active status
+	if req.IsActive != nil {
+		user.IsActive = *req.IsActive
+	}
+
+	err = s.userRepo.Update(ctx, user)
+
+	if err != nil {
+		return err
+	}
+
+	// Force logout all devices
+	err = s.refreshRepo.RevokeByUserID(ctx, user.ID)
+
+	return err
 }
