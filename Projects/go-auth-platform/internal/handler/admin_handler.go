@@ -16,12 +16,14 @@ import (
 )
 
 type AdminHandler struct {
-	admService *service.AdminService
+	admService  *service.AdminService
+	userService *service.UserService
 }
 
-func NewAdminHandler(s *service.AdminService) *AdminHandler {
+func NewAdminHandler(s *service.AdminService, u *service.UserService) *AdminHandler {
 	return &AdminHandler{
-		admService: s,
+		admService:  s,
+		userService: u,
 	}
 }
 
@@ -100,4 +102,28 @@ func (h *AdminHandler) GetUserById(rw http.ResponseWriter, rq *http.Request) {
 		},
 	)
 
+}
+
+// Delete user by ID (Soft Delete)
+func (h *AdminHandler) DeleteUser(rw http.ResponseWriter, rq *http.Request) {
+
+	id := mux.Vars(rq)["id"]
+
+	err := h.userService.DeleteUser(rq.Context(), id)
+
+	if err != nil {
+		utils.JSON(
+			rw,
+			http.StatusBadRequest,
+			dto.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	rw.WriteHeader(
+		http.StatusNoContent,
+	)
 }

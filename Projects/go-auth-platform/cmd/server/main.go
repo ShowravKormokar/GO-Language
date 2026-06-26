@@ -47,7 +47,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	userHandler := handler.NewUserHandler(userService)
 	passResetHandler := handler.NewPasswordHandler(passwordService)
-	adminHandler := handler.NewAdminHandler(adminService)
+	adminHandler := handler.NewAdminHandler(adminService, userService)
 
 	// Register routes
 	r := routes.RegisterRouter(authHandler, userHandler, adminHandler, passResetHandler, blacklistRepo)
