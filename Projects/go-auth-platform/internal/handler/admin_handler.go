@@ -127,3 +127,29 @@ func (h *AdminHandler) DeleteUser(rw http.ResponseWriter, rq *http.Request) {
 		http.StatusNoContent,
 	)
 }
+
+// Get all role
+func (h *AdminHandler) GetRoles(rw http.ResponseWriter, rq *http.Request) {
+	roles, err := h.admService.GetAllRole(rq.Context())
+	if err != nil {
+		utils.JSON(
+			rw,
+			http.StatusInternalServerError,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "failed to fetch roles",
+			},
+		)
+		return
+	}
+
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		dto.APIResponse[[]urdto.RoleResponse]{
+			Success: true,
+			Message: "roles fetched successfully",
+			Data:    roles,
+		},
+	)
+}
