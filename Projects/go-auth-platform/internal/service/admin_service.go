@@ -118,51 +118,38 @@ func (s *AdminService) UpdateUser(ctx context.Context, userID string, req admDto
 		return errors.New("invalid user id")
 	}
 
-	user, err := s.userRepo.FindByID(ctx, id)
-	if err != nil {
-		return errors.New("user not found")
-	}
+	updates := map[string]interface{}{}
 
-	// Update Name
 	if req.Name != nil {
-		if *req.Name == "" {
-			return errors.New("name cannot be empty")
-		}
-		user.Name = *req.Name
+		updates["name"] = *req.Name
 	}
 
-	// Update Email
 	if req.Email != nil {
-		if *req.Email == "" {
-			return errors.New("email cannot be empty")
-		}
-
-		existing, err := s.userRepo.FindByEmail(ctx, *req.Email)
-
-		if err == nil && existing.ID != user.ID {
-			return errors.New("email already exists")
-		}
-		user.Email = *req.Email
+		updates["email"] = *req.Email
 	}
 
-	// Update Role
 	if req.RoleID != nil {
-		user.RoleID = *req.RoleID
+		updates["role_id"] = *req.RoleID
 	}
 
-	// Update Active status
 	if req.IsActive != nil {
-		user.IsActive = *req.IsActive
+		updates["is_active"] = *req.IsActive
+
 	}
 
-	err = s.userRepo.Update(ctx, user)
+	if len(updates) == 0 {
+		return errors.New("no fields to update")
+
+	}
+
+	err = s.admUsrRepo.UpdateFields(ctx, id, updates)
 
 	if err != nil {
 		return err
 	}
 
 	// Force logout all devices
-	err = s.refreshRepo.RevokeByUserID(ctx, user.ID)
+	err = s.refreshRepo.RevokeByUserID(ctx, id)
 
 	return err
 }

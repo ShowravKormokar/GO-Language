@@ -61,6 +61,8 @@ func RegisterRouter(
 	admin.HandleFunc("/users/{id}", adminHandler.GetUserById).Methods("GET")
 	// Assign role to the user
 	admin.HandleFunc("/users/{id}/role", userHandler.AssignRole).Methods("PATCH")
+	// Update user by id
+	admin.HandleFunc("/users/{id}", adminHandler.UpdateUser).Methods("PATCH")
 	// Delete user
 	admin.HandleFunc("/users/{id}", adminHandler.DeleteUser).Methods("DELETE")
 

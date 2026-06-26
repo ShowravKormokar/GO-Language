@@ -153,3 +153,47 @@ func (h *AdminHandler) GetRoles(rw http.ResponseWriter, rq *http.Request) {
 		},
 	)
 }
+
+// Update user by id
+func (h *AdminHandler) UpdateUser(rw http.ResponseWriter, rq *http.Request) {
+	var req admDto.AdminUpdateUserRequest
+
+	err := json.NewDecoder(rq.Body).Decode(&req)
+
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: "invalid request body",
+			},
+		)
+		return
+	}
+
+	id := mux.Vars(rq)["id"]
+
+	err = h.admService.UpdateUser(rq.Context(), id, req)
+
+	if err != nil {
+		utils.JSON(
+			rw,
+			400,
+			dto.ErrorResponse{
+				Success: false,
+				Message: err.Error(),
+			},
+		)
+		return
+	}
+
+	utils.JSON(
+		rw,
+		http.StatusOK,
+		dto.APIResponse[any]{
+			Success: true,
+			Message: "user updated successfully",
+		},
+	)
+}
