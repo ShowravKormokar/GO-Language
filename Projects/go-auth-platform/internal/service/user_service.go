@@ -128,6 +128,7 @@ func (s *UserService) AssignRole(ctx context.Context, targetUserID string, req a
 
 }
 
+// Update user status (Activate or deactivate)
 func (s *UserService) UpdateUserStatus(ctx context.Context, targetUserID string, req admDto.UpdateUserStatusRequest) (*models.User, error) {
 	id, err := uuid.Parse(targetUserID)
 
@@ -158,4 +159,33 @@ func (s *UserService) UpdateUserStatus(ctx context.Context, targetUserID string,
 	}
 
 	return user, nil
+}
+
+// Delete user by ID
+func (s *UserService) DeleteUser(ctx context.Context, userID string) error {
+	id, err := uuid.Parse(userID)
+
+	if err != nil {
+		return errors.New(
+			"invalid user id",
+		)
+	}
+
+	_, err = s.userRepo.FindByID(ctx, id)
+	if err != nil {
+		return errors.New(
+			"user not found",
+		)
+	}
+
+	// Soft delete user
+	err = s.userRepo.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Force logout all devices
+	err = s.refreshRepo.RevokeByUserID(ctx, id)
+
+	return err
 }
