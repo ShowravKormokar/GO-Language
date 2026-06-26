@@ -44,6 +44,5 @@ type PasswordResetRepository interface {
 type AdminUserRepository interface {
 	ListUsers(ctx context.Context, query admDto.AdminUserQuery) ([]models.User, int64, error)
 	FindUserByID(ctx context.Context, id uuid.UUID) (*models.User, error)
-	// UpdateUser(ctx context.Context, user *models.User) error
-	// DeleteUser(ctx context.Context, id uuid.UUID) error
+	UpdateFields(ctx context.Context, id uuid.UUID, data map[string]interface{}) error
 }

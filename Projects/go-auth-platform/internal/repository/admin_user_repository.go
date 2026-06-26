@@ -84,3 +84,14 @@ func (r *adminUserRepo) FindUserByID(ctx context.Context, id uuid.UUID) (*models
 
 	return &user, err
 }
+
+// Update user
+func (r *adminUserRepo) UpdateFields(ctx context.Context, id uuid.UUID, data map[string]interface{}) error {
+
+	return r.db.WithContext(ctx).
+		Model(&models.User{}).
+		Where("id = ?", id).
+		Updates(data).
+		Error
+
+}
