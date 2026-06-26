@@ -15,11 +15,13 @@ import (
 
 type AdminService struct {
 	admUsrRepo repository.AdminUserRepository
+	roleRepo   repository.RoleRepository
 }
 
-func NewAdminUserService(admUsrRepo repository.AdminUserRepository) *AdminService {
+func NewAdminUserService(admUsrRepo repository.AdminUserRepository, roleRepo repository.RoleRepository) *AdminService {
 	return &AdminService{
 		admUsrRepo: admUsrRepo,
+		roleRepo:   roleRepo,
 	}
 }
 
@@ -80,4 +82,27 @@ func (s *AdminService) GetUserByID(ctx context.Context, id string) (*usrDto.User
 	response := mapper.ToUserProfileResponse(user)
 
 	return &response, nil
+}
+
+// Get all roles
+func (s *AdminService) GetAllRole(ctx context.Context) ([]usrDto.RoleResponse, error) {
+
+	roles, err := s.roleRepo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []usrDto.RoleResponse
+
+	for _, role := range roles {
+		response = append(
+			response,
+			usrDto.RoleResponse{
+				ID:          role.ID,
+				Name:        role.Name,
+				Description: role.Description,
+			},
+		)
+	}
+	return response, nil
 }
